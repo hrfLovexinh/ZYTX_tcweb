@@ -1,0 +1,944 @@
+<%@ page import="com.zytx.models.UserInfo,com.zytx.init.GlobalFunction" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@page import="java.util.Date,java.text.SimpleDateFormat"%>
+<%@ taglib prefix="ww" uri="/webwork"%>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>系统统计</title>
+<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/easyui.css">
+<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/icon.css">
+<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/myeasyuiicon.css">
+<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/demo.css">
+<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/jquery.autocomplete.css">
+ <style type="text/css">
+
+        .subtotal { font-weight: bold; }/*合计单元格样式*/
+        .datagrid-header-row td{background-color:rgb(226,237,255);color:#0E2D5F;}
+  </style>
+<script type="text/javascript" src="<%=request.getContextPath()%>/scripts/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="<%=request.getContextPath()%>/scripts/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="<%=request.getContextPath()%>/scripts/jquery.autocomplete.js"></script>
+<script type="text/javascript" src="<%=request.getContextPath()%>/scripts/My97DatePicker/WdatePicker.js"></script>
+
+<% 
+String cityName = GlobalFunction.cityName;
+UserInfo userinfo=(UserInfo)session.getAttribute("sessionAccount");
+int  role = 0; 
+int  userId=0;
+if(userinfo!=null){
+	 role = userinfo.getRole(); 
+	 userId=userinfo.getId();
+	}
+	else{
+		 Cookie[] cookies =  request.getCookies();
+		 String userName = "";
+			 String password = "";
+			if (cookies != null) {
+			   for (Cookie c : cookies) {
+				if (c.getName().equals("userName")) {
+				    userName = c.getValue();
+			      }
+				if (c.getName().equals("password")) {
+				   password = c.getValue();
+			      }
+			    }
+	    }
+			UserInfo user =UserInfo.findFirstBySql(UserInfo.class, "select * from TwoCodeUserInfo where loginName= ?",new Object[] { userName });
+		    role = user.getRole();
+		    userId =user.getId();
+	}
+
+SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");//设置日期格式
+String tjtime =df.format(new Date());// new Date()为获取当前系统时间
+%>
+<script type="text/javascript">
+$.fn.datebox.defaults.formatter = function(date){ 
+	 var y = date.getFullYear(); 
+	 var m = date.getMonth()+1; 
+	 var d = date.getDate(); 
+	 return y+'-'+(m<10?('0'+m):m)+'-'+(d<10?('0'+d):d); 
+	 }; 
+	 $.fn.datebox.defaults.parser = function(s){ 
+	 if (!s) return new Date(); 
+	 var ss = s.split('-'); 
+	 var y = parseInt(ss[0],10); 
+	 var m = parseInt(ss[1],10); 
+	 var d = parseInt(ss[2],10); 
+	 if (!isNaN(y) && !isNaN(m) && !isNaN(d)){ 
+	 return new Date(y,m-1,d); 
+	 } else { 
+	 return new Date(); 
+	 } 
+	 }; 
+
+	 function strDateTime(str)
+	 {
+//	 var r = str.match(/^(\d{1,4})(-|\/)(\d{1,2})\2(\d{1,2})$/); 
+//   var r = str.match(/^(((((1[6-9]|[2-9]\d)\d{2})-(0?[13578]|1[02])-(0?[1-9]|[12]\d|3[01]))|(((1[6-9]|[2-9]\d)\d{2})-(0?[13456789]|1[012])-(0?[1-9]|[12]\d|30))|(((1[6-9]|[2-9]\d)\d{2})-0?2-(0?[1-9]|1\d|2[0-8]))|(((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00))-0?2-29-)) (20|21|22|23|[0-1]?\d):[0-5]?\d:[0-5]?\d)$/);
+	 var r = str.match(/^[1-9][0-9]{3}-(0?[1-9]|1[0|1|2])-(0?[1-9]|[1|2][0-9]|3[0|1])\s(0?[1-9]|1[0-9]|2[0-3]):(0?[0-9]|[1|2|3|4|5][0-9])$/);
+	 if(r==null)
+	 return false; 
+	/* var d= new Date(r[1], r[3]-1, r[4]); 
+	 return (d.getFullYear()==r[1]&&(d.getMonth()+1)==r[3]&&d.getDate()==r[4]);*/
+	 return true;
+	 }
+
+
+
+var opt =0; //0:增加 ；1：编辑
+$(function(){
+
+	$.ajaxSetup ({
+	    cache: false 
+	});
+
+	/*
+	  $(window).resize(function(){  
+		  $('#systongjitt').datagrid('resize');  
+		  });
+	*/
+	var url = encodeURI(encodeURI('/tcweb/elevator/getAutoYwCompanyList')); 
+	 $("#ywCompanyIdinfo").autocomplete(  
+	            url,  
+	            {  
+	            scroll: false,  
+	                matchContains: true,  
+	                width: 188,  
+	                minChars: 2, 
+	                max:20, 
+	                scrollHeight: 100,
+	                extraParams: {	q: function() {
+					return $("#this").val();
+				    }},   
+	                dataType: "json",  
+	                mustMatch:false,  
+	                parse: function(data) {  
+	                    var rows = [];  
+	                    for(var i=0; i<data.length; i++){  
+	                     rows[rows.length] = {   
+	                       data:data[i].id +"-"+data[i].companyName,   
+	                       value:data[i].id,   
+	                       result:data[i].companyName   
+	                       };   
+	                     }  
+	                  return rows;  
+	                    },  
+	                formatItem: function(row, i, n) {  
+	                    return row;  
+	                },
+	                formatResult: function(row){return row.id; }    
+	            }  
+	        ).result(function(event, data, formatted) {
+	        	
+	            if(data)
+	            {
+	        	 $('#ywCompanyIdinfo2').attr("value",formatted);
+	            }
+	            else{
+	             $('#ywCompanyIdinfo2').attr("value",'');
+	 	            }
+	        });
+	
+
+	win = $('#ncqetotal-window').window({  closed:true,draggable:false,modal:true });
+	undotsrwin=$('#undotsrtotal-window').window({  closed:true,draggable:false,modal:true });
+ 
+    $("#ratingDate2").val(myformatter(new Date(), "yyyy-MM"));  //设置查询条件的默认时间
+	
+	grid=$('#systongjitt').datagrid({
+	    title:'电梯安全公共服务平台运行统计表',
+	    fit:true,
+	    striped:true,
+	    fitColumns:true,
+	    pageSize:40,
+	    pageList:[15,20,25,30,35,40],
+	    url:'/tcweb/elevator/systongji',
+	//    url:'/tcweb/elevator/systongjiquery2',
+	    queryParams:{'ratingDate':$('#ratingDate2').attr("value")},
+	    method:"post",
+	    columns:[[{"title":"<span style ='font-size:14px;font-weight:bold;color:#000000'>统计时间:</span><span style ='font-size:14px;font-weight:bold;color:#000000' id='tjsj'></span>","colspan":8}],
+	     	    [
+	        {field:'area',title:'行政区划',align:'center',width:$(this).width() * 0.12,formatter: function(value,rec,index) {
+	            var area = rec.area;
+           /*     if("锦江" == area)
+                    return area+"区";
+                else if("青羊" == area)
+                    return area+"区";
+                else if("金牛" == area)
+                    return area+"区";
+                else if("武侯" == area)
+                    return area+"区";
+                else if("成华" == area)
+                    return area+"区";
+                else if("高新" == area)
+                    return area+"区";
+                else if("天府新" == area)
+                    return area+"区";
+                else if("龙泉驿" == area)
+                    return area+"区";
+                else if("青白江" == area)
+                    return area+"区";
+                else if("新都" == area)
+                    return area+"区";
+                else if("温江" == area)
+                    return area+"区";
+                else if("金堂" == area)
+                    return area+"县";
+                else if("双流" == area)
+                    return area+"区";
+                else if("大邑" == area)
+                    return area+"县";
+                else if("蒲江" == area)
+                    return area+"县";
+                else if("新津" == area)
+                    return area+"县";
+                else if("都江堰" == area)
+                    return area+"市";
+                else if("彭州" == area)
+                    return area+"市";
+                else if("邛崃" == area)
+                    return area+"市";
+                else if("崇州" == area)
+                    return area+"市";
+                else if("简阳" == area)
+                    return area+"市";  
+                else  */
+                    return area;
+		         }}, 
+	        {field:'etotal',align:'center',title:'电梯数量',width:$(this).width() * 0.12},
+	        {field:'setotal',align:'center',title:'停用数量',width:$(this).width() * 0.12},
+	        {field:'ncqetotal',align:'center',title:'维保超期数量',width:$(this).width() * 0.12,formatter: function(value,rec,index) {
+	            var area = rec.area;
+                if (value > 0){
+                    return  value+" "+"<img src='<%=request.getContextPath()%>/images/ncqetotal.png' title='维保超期'  style='cursor:hand;' onclick='ncqetotal("+"\""+area+"\""+")'/>";
+                    }
+                else{
+                    return value;
+                    }
+		         }},
+		    {field:'tsrtotal',align:'center',title:'投诉数量',width:$(this).width() * 0.12}, 
+		    {field:'undotsrtotal',align:'center',title:'投诉未处理',width:$(this).width() * 0.12,formatter: function(value,rec,index) {
+	            var area = rec.area;
+                if (value > 0){
+                    return  value+" "+"<img src='<%=request.getContextPath()%>/images/remarkreply.png' title='投诉未处理'  style='cursor:hand;' onclick='undotsrtotal("+"\""+area+"\""+")'/>";
+                    }
+                else{
+                    return value;
+                    }
+		         }}, 
+		    {field:'nutotal',align:'center',title:'投诉未处理率(%)',width:$(this).width() * 0.12,formatter: function(value,rec,index) {
+		               var tsrtotal = rec.tsrtotal;
+		               var undotsrtotal =rec.undotsrtotal;
+		               var result = Number(undotsrtotal/tsrtotal*100).toFixed(2); 
+		               if(result > 0)
+		    		       return result;
+		    		       else
+		    			   return ""; 
+	                    }
+			      },  
+	        {field:'cql',align:'center',title:'维保超期率(%)',width:$(this).width() * 0.12,formatter: function(value,rec,index) {
+		       var etotal = rec.etotal;
+		       var setotal = rec.setotal;
+		       var ncqetotal = rec.ncqetotal;
+		       var result =Number(ncqetotal/(etotal - setotal)*100).toFixed(2);
+		       if(result > 0)
+		       return result;
+		       else
+			   return ""; 
+		         }}
+	       
+	       
+	    ]], 
+	    toolbar:[
+	   	     	    {
+	   	        text:'导出excel',
+	   	        iconCls:'icon-excel',
+	   	        handler:function(){
+	   	     	    ExporterExcel();
+	   	        }
+	   	    }],
+	//  rowStyler:function(index,row){ {return 'color:#ff0000;';}} , 
+	    pagination:false,
+	    singleSelect:true,
+	    onLoadSuccess:function() {  
+	        $('#tjsj').text($('#ratingDate2').attr("value"));
+            //添加“合计”列
+            $('#systongjitt').datagrid('appendRow', {
+            	area:'<span class="subtotal">'+'合计'+ '</span>',
+            	etotal: '<span class="subtotal">'+ compute("etotal") + '</span>',
+            	setotal: '<span class="subtotal">'+ compute("setotal") + '</span>',
+            	ncqetotal: '<span class="subtotal">'+ compute("ncqetotal") + '</span>',
+            	cql:'<span class="subtotal">'+'合计'+ '</span>',
+            	tsrtotal: '<span class="subtotal">'+ compute("tsrtotal") + '</span>',
+            	undotsrtotal:'<span class="subtotal">'+ compute("undotsrtotal") + '</span>',
+            	nutotal:''
+            });
+        }	      
+	});	
+//	$('#systongjitt').datagrid('getPager').pagination({displayMsg:'显示 {from} 至 {to} 条  共 {total} 条记录', afterPageText:'/{pages}', beforePageText:'页',pageList:[15,20,25,30,35,40]});  
+	$(".datagrid-header-row td div span").each(function(i,th){
+		var val = $(th).text();
+		 $(th).html("<label style='font-weight: bolder;'>"+val+"</label>");
+	});	
+	
+ //	showLeftTime();	  
+}
+);
+
+//指定列求和
+function compute(colName) {  
+     var rows = $('#systongjitt').datagrid('getRows');
+     var total = 0;
+     var total2 = 0;
+     if(colName =="uncqetotal"){
+    	 for (var i = 0; i < rows.length; i++) {
+             total += parseFloat(rows[i]["etotal"]);
+             total2 += parseFloat(rows[i]["eywtotal"]);
+            }
+          total =  total-total2;  
+         }
+     else{  
+     for (var i = 0; i < rows.length; i++) {
+         total += parseFloat(rows[i][colName]);
+        }
+     }
+     return total;
+     }
+
+
+function ywcompanySelectRefresh(){  
+	$('#ywCompanyIdinfo').combobox('clear');  
+	$('#ywCompanyIdinfo').combobox('reload','/tcweb/elevator/getYwQuaRateCompanyList?ratingDate='+$('#ratingDate2').attr("value"));
+	
+}
+//格式化日期
+function myformatter(date) {
+    //获取年份
+    var y = date.getFullYear();
+    //获取月份
+    var m = date.getMonth() + 1;
+    if(m<10)
+        return y + '-0' + m;
+    else
+        return y + '-' + m;
+}
+
+function clearQuery(){
+	
+//	$('#ywCompanyIdinfo').attr("value","");
+//	$('#ywCompanyIdinfo2').attr("value","");
+	$('#areainfo').combobox('clear');
+//	$("#qstartTime").datebox("setValue","");  
+//	$("#qendTime").datebox("setValue","");  
+}
+
+function query(){  
+	/*
+	 var date=new Date;
+	 var year=date.getFullYear(); 
+	 var month=date.getMonth()+1;
+	 
+	 month =(month<10 ? "0"+month:month); 
+	 var mydate = (year.toString()+"-"+month.toString());
+   */
+	 var ratingDate=$('#ratingDate2').attr("value");
+     
+	 
+		 grid.datagrid("options").url='/tcweb/elevator/systongjiquery2';
+	     grid.datagrid("options").queryParams={'ratingDate':ratingDate};
+        
+	
+	 
+     
+  
+ 
+      
+     
+    $('#systongjitt').datagrid('reload');
+	}
+
+function ncqetotalclearQuery(){
+	$('#registNumber').attr("value","");
+	$('#qaddress').attr("value","");
+	$('#buildingName').attr("value","");
+}
+
+function ncqetotalquery(){  
+	var registNumber=$('#registNumber').attr("value");
+	var address=$('#qaddress').attr("value");
+	var buildingName=$('#buildingName').attr("value");
+	var ywCompanyId=clickYwcompanyId;  
+	var qstartTime=$('#qstartTime').datebox("getValue");  
+	var qendTime=$('#qendTime').datebox("getValue");                           
+	 $('#tncqetotal').datagrid("options").url='/tcweb/yw/ncqetotalquery';
+	 $('#tncqetotal').datagrid("options").queryParams={'registNumber':registNumber,'address':address,'buildingName':buildingName,'ywcompanyId':ywCompanyId,'qstartTime':qstartTime,'qendTime':qendTime};
+	 
+	 $('#tncqetotal').datagrid('reload');
+}
+
+
+
+function uncqetotalclearQuery(){
+	$('#uregistNumber').attr("value","");
+	$('#uqaddress').attr("value","");
+	$('#ubuildingName').attr("value","");
+}
+
+function uncqetotalquery(){  
+	var registNumber=$('#uregistNumber').attr("value");
+	var address=$('#uqaddress').attr("value");
+	var buildingName=$('#ubuildingName').attr("value");
+	var ywCompanyId=clickYwcompanyId;  
+	var qstartTime=$('#qstartTime').datebox("getValue");  
+	var qendTime=$('#qendTime').datebox("getValue");                            
+	 $('#tuncqetotal').datagrid("options").url='/tcweb/yw/uncqetotalquery';
+	 $('#tuncqetotal').datagrid("options").queryParams={'registNumber':registNumber,'address':address,'buildingName':buildingName,'ywcompanyId':ywCompanyId,'qstartTime':qstartTime,'qendTime':qendTime,'area':zjqueryByarea};
+	 
+	 $('#tuncqetotal').datagrid('reload');
+}
+
+
+function nutotalclearQuery(){
+	$('#loginName').attr("value","");
+	
+}
+
+function nutotalquery(){ 
+	var loginName=$('#loginName').attr("value"); 
+	var ywCompanyId=clickYwcompanyId;
+	 $('#tnutotal').datagrid("options").url='/tcweb/yw/nutotalquery'; 
+	 $('#tnutotal').datagrid("options").queryParams={'loginName':loginName,'ywcompanyId':ywCompanyId};
+	 $('#tnutotal').datagrid('reload');
+	
+}
+
+function uywncqetotalclearQuery(){
+	$('#uywregistNumber').attr("value","");
+	$('#uywqaddress').attr("value","");
+	$('#uywbuildingName').attr("value","");
+}
+
+function uywncqetotalquery(){  
+	var registNumber=$('#uywregistNumber').attr("value");
+	var address=$('#uywqaddress').attr("value");
+	var buildingName=$('#uywbuildingName').attr("value");
+	var ywCompanyId=clickYwcompanyId; 
+	var userId =clickYwUserId;                        
+	 $('#tuywncqetotal').datagrid("options").url='/tcweb/yw/uywncqetotalquery';
+	 $('#tuywncqetotal').datagrid("options").queryParams={'registNumber':registNumber,'address':address,'buildingName':buildingName,'ywcompanyId':ywCompanyId,'userId':userId};
+	 
+	 $('#tuywncqetotal').datagrid('reload');
+}
+
+/**  
+ * 计算传入时间和当前时间差  
+ * @param d 时间 格式：2010-04-10 10:22:36  
+ * @return  
+ */  
+function getDateDiff(d){      
+    var now = new Date().getTime();   
+    var diffValue = now - Date.parse(d.replace(/-/g,'/').replace(/：/g,":"));  
+    if(diffValue < 0){        
+        return "";       
+    }      
+    var minute = 1000 * 60;     
+    var hour = minute * 60;     
+    var day = hour * 24;    
+    var halfamonth = day * 15;    
+    var month = day * 30;    
+    var monthC =diffValue/month;      
+    var weekC =diffValue/(7*day);      
+    var dayC =diffValue/day;      
+    var hourC =diffValue/hour;     
+    var minC =diffValue/minute;  
+    /*        
+    if(monthC>=1){       
+       result=parseInt(monthC) + "个月前";       
+    }else if(weekC>=1){   
+       result=parseInt(weekC) + "个星期前";       
+   }else if(dayC>=1){       
+        result= parseInt(dayC) +"天前";       
+   }else if(hourC>=1){       
+      result= parseInt(hourC) +"个小时前";      
+   }else if(minC>=1){       
+      result= parseInt(minC) +"分钟前";       
+   }else{   
+       result="";       
+    }  
+    */
+      
+    return parseInt(dayC-15);  
+  /*  if(dayC>15)
+        return true;
+    else if(dayC ==15){
+        if(minC>=1)
+            return true;
+        else 
+            return false;
+        }
+    else
+        return false;
+    */    
+        
+}   
+
+
+var clickYwcompanyId =0;
+var zjqueryByarea = "";
+function ncqetotal(area){
+	
+	 var date=new Date;
+	 var year=date.getFullYear(); 
+	 var month=date.getMonth()+1;
+	 
+	 month =(month<10 ? "0"+month:month); 
+	 var mydate = (year.toString()+"-"+month.toString());
+
+    /* 
+	 if(mydate != $('#ratingDate2').attr("value")){
+		 $.messager.alert('操作失败','本月数据可查询超期详情','error');
+         return;
+		 }
+	 */
+	 
+	win.window('open'); 
+//	$('#registNumberMap').html(registNumber);
+     gridncqetotal=$('#tncqetotal').datagrid({
+	    title:'',
+	    pageSize:10,
+	    pageList:[10,20,30,40],
+	    url:'/tcweb/elevator/ncqetotallist2ByOrder2',
+	    queryParams:{'area':area,'ratingDate':$('#ratingDate2').attr("value")},
+	    frozenColumns:[[
+           {field:'registNumber',title:'电梯编号↑↓',sortable : true,width:80,formatter: function(value,rec,index) {
+           	<% if("1".equals(cityName)){ %>
+            return "N"+value;
+            <% } else {%>
+            return value;
+            <% }%>
+       }},
+           {field:'address',title:'地址↑↓',sortable : true,width:160},
+           {field:'buildingName',title:'楼盘',width:100}]],
+	    columns:[[ 
+	        {field:'building',title:'栋',width:60},
+	        {field:'unit',title:'单元',width:60},
+	        {field:'wgCompanyName',title:'使用公司'},
+	        {field:'telephone',title:'使用公司电话'},
+	        {field:'ywCompanyName',title:'运维公司'},
+	        {field:'userName',title:'运维人员'},
+	        {field:'contactPhone',title:'运维联系电话'},
+	        {field:'endTime',title:'上一次运维结束时间'},
+	        {field:'area',title:'行政区划',width:60,formatter: function(value,rec,index) {
+	            var area = rec.area;
+             /*   if("锦江" == area)
+                    return area+"区";
+                else if("青羊" == area)
+                    return area+"区";
+                else if("金牛" == area)
+                    return area+"区";
+                else if("武侯" == area)
+                    return area+"区";
+                else if("成华" == area)
+                    return area+"区";
+                else if("高新" == area)
+                    return area+"区";
+                else if("天府新" == area)
+                    return area+"区";
+                else if("龙泉驿" == area)
+                    return area+"区";
+                else if("青白江" == area)
+                    return area+"区";
+                else if("新都" == area)
+                    return area+"区";
+                else if("温江" == area)
+                    return area+"区";
+                else if("金堂" == area)
+                    return area+"县";
+                else if("双流" == area)
+                    return area+"区";
+                else if("大邑" == area)
+                    return area+"县";
+                else if("蒲江" == area)
+                    return area+"县";
+                else if("新津" == area)
+                    return area+"县";
+                else if("都江堰" == area)
+                    return area+"市";
+                else if("彭州" == area)
+                    return area+"市";
+                else if("邛崃" == area)
+                    return area+"市";
+                else if("崇州" == area)
+                    return area+"市";
+                else if("简阳" == area)
+                    return area+"市";
+                else  */
+                    return area;
+		         }}
+         ]],
+     //    fitColumns:true,
+    //     nowrap:true,
+	    pagination:true
+	
+});
+     $('#tncqetotal').datagrid('getPager').pagination({displayMsg:'显示 {from} 至 {to} 条  共 {total} 条记录', afterPageText:'/{pages}', beforePageText:'页',pageList:[10,20,30,40]});  
+	
+}
+
+var queryArea="";
+function undotsrtotal(area){
+	queryArea =area;
+	undotsrwin.window('open'); 
+//	$('#registNumberMap').html(registNumber);
+     gridundotsrtotal=$('#undotsrtotal').datagrid({
+	    title:'',
+	    pageSize:10,
+	    pageList:[10,20,30,40],
+	    url:'/tcweb/elevator/undotsrtotallist2ByOrder',
+	    queryParams:{'area':area},
+	    frozenColumns:[[
+	                    {field:'registNumber',title:'电梯编号↑↓',sortable : true,width:80,formatter: function(value,rec,index) {
+		                	<% if("1".equals(cityName)){ %>
+                            return "N"+value;
+                            <% } else {%>
+                            return value;
+                            <% }%>
+		                }},
+	                    {field:'address',title:'地址↑↓',sortable : true,width:160},
+	                    {field:'buildingName',title:'楼盘',width:100}]],
+	    columns:[[
+	        {field:'building',title:'栋',width:60},
+	        {field:'unit',title:'单元'},
+	        {field:'remarkInfo',title:'留言内容'},
+	        {field:'remarkDate',title:'留言日期',width:220,formatter: function(value,rec,index) {
+                if(value!="0")
+                    return value.substring(0,16);
+		         }},
+		    {field:'wgCompanyName',title:'使用公司'},
+			{field:'telephone',title:'使用公司电话'},
+			{field:'ywCompanyName',title:'运维公司'},
+			{field:'userName',title:'运维人员'},
+			{field:'contactPhone',title:'运维联系电话'},
+	        {field:'area',title:'行政区划',width:60,formatter: function(value,rec,index) {
+	            var area = rec.area;
+            /*    if("锦江" == area)
+                    return area+"区";
+                else if("青羊" == area)
+                    return area+"区";
+                else if("金牛" == area)
+                    return area+"区";
+                else if("武侯" == area)
+                    return area+"区";
+                else if("成华" == area)
+                    return area+"区";
+                else if("高新" == area)
+                    return area+"区";
+                else if("天府新" == area)
+                    return area+"区";
+                else if("龙泉驿" == area)
+                    return area+"区";
+                else if("青白江" == area)
+                    return area+"区";
+                else if("新都" == area)
+                    return area+"区";
+                else if("温江" == area)
+                    return area+"区";
+                else if("金堂" == area)
+                    return area+"县";
+                else if("双流" == area)
+                    return area+"区";
+                else if("大邑" == area)
+                    return area+"县";
+                else if("蒲江" == area)
+                    return area+"县";
+                else if("新津" == area)
+                    return area+"县";
+                else if("都江堰" == area)
+                    return area+"市";
+                else if("彭州" == area)
+                    return area+"市";
+                else if("邛崃" == area)
+                    return area+"市";
+                else if("崇州" == area)
+                    return area+"市";
+                else if("简阳" == area)
+                    return area+"市";
+                else  */
+                    return area;
+		         }}
+         ]],
+         fitColumns:true,
+         nowrap:true,
+	    pagination:true
+	
+});
+     $('#undotsrtotal').datagrid('getPager').pagination({displayMsg:'显示 {from} 至 {to} 条  共 {total} 条记录', afterPageText:'/{pages}', beforePageText:'页',pageList:[10,20,30,40]});  
+	
+}
+
+
+function undotsrquery(){
+	var registNumber=$('#registNumber').attr("value");
+    var buildingName=$('#buildingName').attr("value");
+    gridundotsrtotal.datagrid("options").url='/tcweb/elevator/undotsrquery2ByOrder';
+    gridundotsrtotal.datagrid("options").queryParams={'area':queryArea,'registNumber':registNumber,'buildingName':buildingName};
+	
+    $('#undotsrtotal').datagrid('reload');
+}
+
+/*
+function undotsrquery(){
+	var registNumber=$('#registNumber').attr("value");
+    var buildingName=$('#buildingName').attr("value");
+	 gridundotsrtotal=$('#undotsrtotal').datagrid({
+		    title:'',
+		    pageSize:10,
+		    pageList:[10,20,30,40],
+		    url:'/tcweb/elevator/undotsrquery',
+		    queryParams:{'area':queryArea,'registNumber':registNumber,'buildingName':buildingName},
+		    columns:[[
+		        {field:'registNumber',title:'电梯编号',width:100},
+		        {field:'address',title:'地址',width:200},
+		        {field:'buildingName',title:'楼盘',width:200},
+		        {field:'building',title:'栋',width:200},
+		        {field:'unit',title:'单元'},
+		        {field:'remarkInfo',title:'留言内容'},
+		        {field:'remarkDate',title:'留言日期',width:220,formatter: function(value,rec,index) {
+	                if(value!="0")
+	                    return value.substring(0,16);
+			         }},
+		        {field:'area',title:'行政区划',width:200}
+	         ]],
+	         fitColumns:true,
+	         nowrap:true,
+		    pagination:true
+		
+	});
+	     $('#undotsrtotal').datagrid('getPager').pagination({displayMsg:'显示 {from} 至 {to} 条  共 {total} 条记录', afterPageText:'/{pages}', beforePageText:'页',pageList:[10,20,30,40]});  
+		
+}
+*/
+function undotsrclear(){
+	$('#registNumber').attr("value","");
+	$('#buildingName').attr("value","");
+	
+}
+
+function uncqetotal(ywcompanyId){
+	clickYwcompanyId =ywcompanyId;
+	var qstartTime=$('#qstartTime').datebox("getValue");  
+	var qendTime=$('#qendTime').datebox("getValue");
+	uwin.window('open'); 
+    griduncqetotal=$('#tuncqetotal').datagrid({
+	    title:'',
+	    pageSize:10,
+	    pageList:[10,20,30,40],
+	    url:'/tcweb/yw/uncqetotallist',
+	    queryParams:{'ywcompanyId':ywcompanyId,'qstartTime':qstartTime,'qendTime':qendTime,'area':zjqueryByarea},
+	    columns:[[
+	        {field:'registNumber',title:'电梯编号',width:100,formatter: function(value,rec,index) {
+            	<% if("1".equals(cityName)){ %>
+                return "N"+value;
+                <% } else {%>
+                return value;
+                <% }%>
+           }},
+	        {field:'address',title:'地址',width:200},
+	        {field:'buildingName',title:'楼盘',width:200}
+         ]],
+         fitColumns:true,
+         nowrap:true,
+	    pagination:true
+	
+});
+     $('#tuncqetotal').datagrid('getPager').pagination({displayMsg:'显示 {from} 至 {to} 条  共 {total} 条记录', afterPageText:'/{pages}', beforePageText:'页',pageList:[10,20,30,40]});  
+	
+}
+
+var clickYwUserId =0;
+function uywncqetotal(ywcompanyId,userId){   
+	clickYwUserId = userId;
+	uywnnuwin.window('open');
+	griduywncqetotal=$('#tuywncqetotal').datagrid({
+		    title:'',
+		    pageSize:10,
+		    pageList:[10,20,30,40],
+		    url:'/tcweb/yw/uywncqetotallist',
+		    queryParams:{'ywcompanyId':ywcompanyId,'userId':userId},
+		    columns:[[
+		        {field:'registNumber',title:'电梯编号',width:100,formatter: function(value,rec,index) {
+                	<% if("1".equals(cityName)){ %>
+                    return "N"+value;
+                    <% } else {%>
+                    return value;
+                    <% }%>
+               }},
+		        {field:'address',title:'地址',width:200},
+		        {field:'buildingName',title:'楼盘',width:200},
+		        {field:'endTime',title:'上一次运维结束时间'}
+	         ]],
+	         fitColumns:true,
+	         nowrap:true,
+		    pagination:true
+		
+	});
+	     $('#tuywncqetotal').datagrid('getPager').pagination({displayMsg:'显示 {from} 至 {to} 条  共 {total} 条记录', afterPageText:'/{pages}', beforePageText:'页',pageList:[10,20,30,40]});  
+		
+}
+
+function nutotal(ywcompanyId){ 
+ clickYwcompanyId =ywcompanyId;
+ nuwin.window('open'); 
+ gridtnutotal=$('#tnutotal').datagrid({
+    title:'',
+    pageSize:15,
+    pageList:[15,20,25,30,35,40],
+    url:'/tcweb/yw/nutotallist',
+    queryParams:{'ywcompanyId':ywcompanyId},
+    columns:[[
+        {field:'loginName',title:'登陆名称',width:150},
+        {field:'userName',title:'姓名',width:200},
+        {field:'qualificationvalidate',title:'资质有效期',width:150},
+        {field:'uywetotal',title:'运维电梯数',width:100}, 
+        {field:'uywcqetotal',title:'超期电梯数',width:100,formatter: function(value,rec,index) {
+            var userId = rec.userId;  
+            var ywcompanyId = clickYwcompanyId;
+            if (value > 0){
+                return  value+" "+"<img src='<%=request.getContextPath()%>/images/ncqetotal.png' alt='当前超期'  style='cursor:hand;' onclick='uywncqetotal("+ywcompanyId+","+userId+")'/>";
+                }
+            else{
+                return value;
+                }
+	         }}
+     ]],
+     nowrap:true,
+    pagination:true
+
+});
+ $('#tnutotal').datagrid('getPager').pagination({displayMsg:'显示 {from} 至 {to} 条  共 {total} 条记录', afterPageText:'/{pages}', beforePageText:'页',pageList:[15,20,25,30,35,40]});  
+
+}
+
+function showLeftTime()
+{
+var now=new Date();
+var year=now.getYear();
+var month=now.getMonth();
+var day=now.getDate();
+var hours=now.getHours();
+var minutes=now.getMinutes();
+var seconds=now.getSeconds();
+document.all.tjtime.innerHTML=""+year+"年"+month+"月"+day+"日 "+hours+":"+minutes+":"+seconds+"";
+alert(document.all.tjtime);
+}
+
+function ExporterExcel(){ /*
+	var rows =$('#systongjitt').datagrid("getRows");
+	for (var i = 0; i < rows.length; i++) {    //进行数据处理
+		
+	}
+	 //移除不要的字段
+
+	 var bodyData = JSON.stringify(rows);  //转成json字符串
+
+	 //替换中文标题
+
+	 var postData = {
+	            data: a
+	        };
+   */
+   /*
+   jQuery.post('/tcweb/elevator/exportExcel',
+		   function(data){
+  		eval("data="+"'"+data+"'");  
+  		if("success"==data){
+  		 $.messager.show({   
+		 title:'提示信息',
+		 timeout:1000,
+		 msg:'操作成功，谢谢。' 
+	 });  	
+        grid.datagrid('reload');
+  		}
+  		else{
+  			$.messager.alert('操作失败','操作失败','error');
+	    		}
+     }); */
+ //   url ='/tcweb/elevator/exportExcel';
+    url ='/tcweb/elevator/exportExcel2?ratingDate='+$('#tjsj').text();
+	window.location.href = url;
+	
+}
+
+</script>
+<style type="text/css">
+td{
+font-size:12px;
+	overflow:hidden;
+	padding:0;
+	margin:0;
+	}
+</style>
+</head>
+<body class="easyui-layout" data-options="fit:true">
+ <div region="north" style="overflow:hidden;background-color:rgb(201,220,245);">  
+ <fieldset id="addDiv" style="width: 100%;margin:0px"><legend>查询条件</legend>
+    <center>
+     <table border="0"> 
+    <tr>
+     <td nowrap>时间：</td>
+        <td>
+       <input type="text" id="ratingDate2" name="ratingDate2" onfocus="WdatePicker({dateFmt:'yyyy-MM'})" class="Wdate" >
+        </td>
+   <td colspan="2">
+
+				<a href="#" class="easyui-linkbutton" icon="icon-search" onclick="query()">查询</a>  				
+</td>
+					
+   </tr>
+   
+     </table>
+   </center>
+  </fieldset>
+</div> 
+   <div region="center" style="width:100%;">
+      
+       <table id="systongjitt"></table>
+    
+</div> 
+
+<div id="ncqetotal-window" title="运维超期" style="width:780px;height:450px;" class="easyui-layout">
+  <div style="margin:10px;OVERFLOW-Y: auto; OVERFLOW-X:hidden;height:400px;">
+   <div style="margin-top:1px;" title="运维超期列表" region="center" >  
+       <table id="tncqetotal"></table>
+   </div>
+  </div> 
+ </div>
+ 
+<div id="undotsrtotal-window" title="投诉未处理" style="width:780px;height:450px;" class="easyui-layout">
+  <div style="margin:10px;OVERFLOW-Y: auto; OVERFLOW-X:hidden;height:400px;">
+   <div region="north" style="overflow:hidden;width:748px">
+     <fieldset id="addDiv"><legend>查询条件</legend>
+      <table border="0"> 
+     <tr>      
+   <td align="right" nowrap>电梯编号：</td> 
+   <% if("1".equals(cityName)){ %>
+   <td nowrap>N<input id="registNumber" name="registNumber" size="18" class="easyui-validatebox"></input></td>
+    <% } else {%>
+   <td nowrap><input id="registNumber" name="registNumber" size="18" class="easyui-validatebox"></input></td>
+ <% }%>
+    <td align="right" nowrap>楼盘名称：</td> 
+   <td nowrap><input id="buildingName" name="buildingName" size="18" class="easyui-validatebox"></input></td>
+   <td><a href="#" class="easyui-linkbutton" icon="icon-search" onclick="undotsrquery()">查询</a>  
+				<a href="#" class="easyui-linkbutton" icon="icon-no" onclick="undotsrclear()">清空</a></td> 
+   </tr>
+   </table>
+     </fieldset>
+   </div>
+   <div style="margin-top:1px;" title="投诉未处理" region="center" >  
+       <table id="undotsrtotal"></table>
+   </div>
+  </div> 
+ </div>
+ 
+
+</body>
+</html>

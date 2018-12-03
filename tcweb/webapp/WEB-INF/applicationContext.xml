@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.5.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+
+	<!-- 添加aspectj自动代理支持 -->
+	<aop:aspectj-autoproxy />
+
+	<!-- 配置数据源 -->
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>/WEB-INF/classes/database.properties</value>
+				<value>/WEB-INF/classes/global.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close" p:minPoolSize="1" p:maxPoolSize="15"
+		p:initialPoolSize="1" p:acquireIncrement="3" p:acquireRetryAttempts="30"
+		p:acquireRetryDelay="1000" p:autoCommitOnClose="false"
+		p:breakAfterAcquireFailure="false" p:checkoutTimeout="10000"
+		p:maxIdleTime="60" p:maxStatements="100">
+		<property name="driverClass">
+			<value>${location.jdbc.driver}</value>
+		</property>
+		<property name="jdbcUrl">
+			<value>${location.jdbc.url}</value>
+		</property>
+		<property name="user">
+			<value>${location.jdbc.user}</value>
+		</property>
+		<property name="password">
+			<value>${location.jdbc.password}</value>
+		</property>
+	</bean>
+       
+   <!--    <bean id="dataSource2" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close" p:minPoolSize="1" p:maxPoolSize="15"
+		p:initialPoolSize="1" p:acquireIncrement="3" p:acquireRetryAttempts="30"
+		p:acquireRetryDelay="1000" p:autoCommitOnClose="false"
+		p:breakAfterAcquireFailure="false" p:checkoutTimeout="0"
+		p:maxIdleTime="60" p:maxStatements="100">
+		<property name="driverClass">
+			<value>${location.jdbc.driver}</value>
+		</property>
+		<property name="jdbcUrl">
+			<value>${location.jdbc.surl}</value>
+		</property>
+		<property name="user">
+			<value>${location.jdbc.suser}</value>
+		</property>
+		<property name="password">
+			<value>${location.jdbc.spassword}</value>
+		</property>
+	</bean>   -->    
+   
+	<bean id="ds" class="com.et.ar.ConnectionFactoryBean">
+		<property name="domainBaseClass" value="com.et.ar.ActiveRecordBase" />
+		<property name="adapterClass" value="com.et.ar.adapters.SqlServerAdapter" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+      
+   <!-- <bean id="ds2" class="com.et.ar.ConnectionFactoryBean">
+		<property name="domainBaseClass" value="com.zytx.models.YuanShiActiveRecordBase" />
+		<property name="adapterClass" value="com.et.ar.adapters.SqlServerAdapter" />
+		<property name="dataSource" ref="dataSource2" />
+	</bean>     -->
+	
+	
+	<bean id="SpringContextUtil" class="com.zytx.util.SpringContextUtil"
+		scope="singleton" />
+
+	<bean id="globalConfig" class="com.zytx.init.GlobalConfig"
+		p:configLocation="classpath:global.properties" />
+		
+   
+</beans>
