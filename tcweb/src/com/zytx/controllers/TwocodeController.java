@@ -6,11 +6,28 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.Cookie;
+
 import java.util.Date;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.et.ar.ActiveRecordBase;
 import com.et.ar.ConvertUtil;
@@ -18,6 +35,7 @@ import com.et.ar.exception.ActiveRecordException;
 import com.et.ar.exception.TransactionException;
 import com.et.mvc.Controller;
 import com.et.mvc.JsonView;
+import com.et.mvc.MultipartFile;
 import com.et.mvc.View;
 import com.et.mvc.filter.BeforeFilter;
 import com.zytx.converters.DateConverter;
@@ -47,6 +65,7 @@ import com.zytx.models.SysSetings;
 import com.zytx.models.SysSetingsVO;
 import com.zytx.models.TCUserInfoView;
 import com.zytx.models.TwoCodeElevatorYwCompanyInfo;
+import com.zytx.models.TwoCodeInfo;
 import com.zytx.models.Twocode96333;
 import com.zytx.models.Twocode96333VO;
 import com.zytx.models.Twocode96333pVO;
@@ -619,6 +638,331 @@ public View query96333zt(Twocode96333pVO twocode96333pVO,int page, int rows){
 
 		return result;
 		
+	}
+	
+	
+	//入库的导入的模板下载
+	public void downLoad(String way) {
+		String filename = "";
+		if("ruku".equals(way)) {
+			filename = "标签入库信息.xlsx";
+		}else {
+			filename = "标签领用信息.xlsx";
+		}
+        //获取模板的输入流
+        InputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream("C:/Users/HRF/Desktop/" + filename);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        OutputStream out = null;
+        try {
+            response.setContentType("application/ms-excel;charset=UTF-8");
+            response.setHeader("Content-Disposition", "attachment;filename="
+                    .concat(String.valueOf(URLEncoder.encode(filename, "UTF-8"))));
+            out = response.getOutputStream();
+            byte[] bs = new byte[1024];
+            //InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            while(inputStream.read(bs) != -1) {
+                out.write(bs);
+                out.flush();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                out.close();
+                inputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+	
+	//标签入库导入
+	public String rukuExport(MultipartFile file) {
+		//获取入库人信息
+		String userName = "";
+		Cookie[] cookies;
+		UserInfo userinfo=(UserInfo)session.getAttribute("sessionAccount");
+		if(userinfo!=null){
+			userName = userinfo.getLoginName();
+			}
+			else{
+				 cookies =  request.getCookies();
+					if (cookies != null) {
+					   for (Cookie c : cookies) {
+						if (c.getName().equals("userName")) {
+						    userName = c.getValue();
+					      }
+					    }
+			    }
+			}
+		try {
+			UserInfoVO user =UserInfoVO.findFirstBySql(UserInfoVO.class, "select isnull(te.contactPhone,'') as contactPhone,isnull(te.userName,'') as userName from TwoCodeUserInfo t left join TwoCodeUserExtInfo te on t.id =te.userid where loginName= ?",new Object[] { userName });
+			userName = user.getUserName();
+		} catch (ActiveRecordException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		//获取上传文件名
+		String filename = file.getOriginalFilename();
+		System.out.println(filename);
+		//获取一个文件工作簿
+		Workbook workBook=null;
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		int rowNum = 1;
+		String result = "";
+		try {
+			workBook = new XSSFWorkbook(file.getInputStream());
+			//获取一个sheet
+			Sheet sheet = workBook.getSheetAt(0);
+			Row row = null;
+			Cell cell = null;
+			String registNumber = "";
+			TwocodeVO twocodeInfo = null;
+			int count = 0;
+			while(sheet.getRow(rowNum) != null) {
+				row = sheet.getRow(rowNum);
+				cell = row.getCell(0);
+				try {
+					registNumber = row.getCell(0).getStringCellValue(); 
+				} catch (Exception e) {
+					Double cellValue = row.getCell(0).getNumericCellValue();
+					registNumber = new DecimalFormat("#").format(cellValue);
+				}
+				if("".equals(registNumber)) {
+					continue;
+				}
+				//查询数据库
+				twocodeInfo = TwocodeVO.findFirst(TwocodeVO.class, "registNumber=?", new Object[]{registNumber});
+				if(twocodeInfo == null) {
+					TwoCodeInfo twoCode = new TwoCodeInfo();
+					//入库
+					twoCode.setRegistNumber(registNumber);
+					twoCode.setPtime(dateFormat.format(new Date()));
+					twoCode.setPuserName(userName);
+					twoCode.save();
+					count ++;
+				} else {
+					result = result + "," + registNumber;
+				}
+				//计数第几行
+				rowNum ++;
+			}
+			if("".equals(result)) {
+				return "成功导入<span style='color:red'>" + count + "</span>条数据";
+			} else {
+				result = result.substring(1);
+				return "成功导入<span style='color:red'></span>" + count + "条数据\n" + "标签编号为" + result + "的标签已经入库,无法导入!";
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return "导入异常,请与管理员联系!";
+		} catch (ActiveRecordException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return "导入异常,请与管理员联系!";
+		} finally {
+			//释放资源
+			try {
+				workBook.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	//标签领用导入
+	public View chukuExport(MultipartFile file) {
+		Map<String,Object> result = new HashMap<String,Object>();
+		int exportSuccess = 0;
+		int registNumberNoExistCount = 0;
+		int companyNoExistCount = 0;
+		int incompleteCount = 0;
+		String incomplete = "";
+		String registNumberNoExist = "";
+		String companyNoExist = "";
+		int failDataCount = 0;
+		List<TwocodeVO> failData = new ArrayList<TwocodeVO>();
+		//获取上传文件名
+		String filename = file.getOriginalFilename();
+		System.out.println(filename);
+		//获取一个文件工作簿
+		Workbook workBook=null;
+		int rowNum = 1;
+		String type = "";
+		try {
+			workBook = new XSSFWorkbook(file.getInputStream());
+			//获取一个sheet
+			Sheet sheet = workBook.getSheetAt(0);
+			Row row = null;
+			List<TwocodeVO> twocodeInfos = null;
+			TwocodeVO twocodeInfo = null;
+			CompanyInfo companyInfo = null;
+			String str = "";
+			String cellStr = "";
+			Row rowFirst = sheet.getRow(0);
+			while(sheet.getRow(rowNum) != null) {
+				row = sheet.getRow(rowNum);
+				TwocodeVO twoCode = new TwocodeVO();
+				for(int i = 0;i < rowFirst.getLastCellNum();i ++) {
+					if(row.getCell(i) == null) {
+						str = "";
+					} else {
+						try {
+							str = row.getCell(i).getStringCellValue();
+						} catch (Exception e) {
+							if (DateUtil.isCellDateFormatted(row.getCell(i))) {
+								SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+								Date date = row.getCell(i).getDateCellValue();  
+								str = sdf.format(date); 
+							} else {
+								Double cellValue = row.getCell(i).getNumericCellValue();
+								str = new DecimalFormat("#").format(cellValue);
+							}
+						}
+					}
+					cellStr = rowFirst.getCell(i).getStringCellValue();
+					if("标签编号".equals(cellStr)) {
+						twoCode.setRegistNumber(str);
+					}
+					if("领用类型（个人/公司）".equals(cellStr)) {
+						type = str;
+					}
+					if("领用人单位".equals(cellStr)) {
+						twoCode.setYwCompanyName(str.length()>2?str:"");
+					}
+					if("领用人姓名".equals(cellStr)) {
+						twoCode.setUserName(str.length()>1?str:"");
+					}
+					if("领用人账号（个人领用必填）".equals(cellStr)) {
+						twoCode.setLoginName(str.length()>2?str:"");
+					}
+					if("领用日期".equals(cellStr)) {
+						twoCode.setRtime(str.length()>2?str:"");
+					}
+				}
+				if(!twoCode.getRegistNumber().matches("[0-9]{6}")) {
+					incompleteCount ++;
+					incomplete = incomplete + ", " + twoCode.getRegistNumber();
+					//计数第几行
+					rowNum ++;
+					continue;
+				}
+				if(twoCode.getUserName() == null || "".equals(twoCode.getUserName())) {
+					incompleteCount ++;
+					incomplete = incomplete + ", " + twoCode.getRegistNumber();
+					//计数第几行
+					rowNum ++;
+					continue;
+				}
+				if(twoCode.getRtime() == null || "".equals(twoCode.getRtime())) {
+					incompleteCount ++;
+					incomplete = incomplete + ", " + twoCode.getRegistNumber();
+					//计数第几行
+					rowNum ++;
+					continue;
+				}
+				if("个人".equals(type)) {
+					if(twoCode.getLoginName() == null || "".equals(twoCode.getLoginName())) {
+						incompleteCount ++;
+						incomplete = incomplete + ", " + twoCode.getRegistNumber();
+						//计数第几行
+						rowNum ++;
+						continue;
+					}
+				} else if ("公司".equals(type)) {
+					if(twoCode.getYwCompanyName() == null || "".equals(twoCode.getYwCompanyName())) {
+						incompleteCount ++;
+						incomplete = incomplete + ", " + twoCode.getRegistNumber();
+						//计数第几行
+						rowNum ++;
+						continue;
+					}
+				} else {
+					if((twoCode.getLoginName() == null || "".equals(twoCode.getLoginName())) && (twoCode.getYwCompanyName() == null || "".equals(twoCode.getYwCompanyName()))) {
+						incompleteCount ++;
+						incomplete = incomplete + ", " + twoCode.getRegistNumber();
+						//计数第几行
+						rowNum ++;
+						continue;
+					}
+				}
+				//查询数据库
+				//twocodeInfo = TwocodeVO.findFirst(TwocodeVO.class, "registNumber=?", new Object[]{twoCode.getRegistNumber()});
+				twocodeInfos = TwocodeVO.findBySql(TwocodeVO.class, "select t.*,c.companyName as ywCompanyName from TwoCodeInfo t left join TwoCodeCompanyInfo c on t.ywcompanyId=c.id where t.registNumber=?", new Object[]{twoCode.getRegistNumber()});
+				if(twocodeInfos != null && twocodeInfos.size() != 0) {
+					twocodeInfo = twocodeInfos.get(0);
+				}
+				if(twocodeInfo == null) {
+					//标签编号不存在
+					registNumberNoExistCount ++;
+					registNumberNoExist = registNumberNoExist + ", " + twoCode.getRegistNumber();
+				} else {
+					//标签编号存在
+					if(!"".equals(twoCode.getYwCompanyName())) {
+						companyInfo = CompanyInfo.findFirst(CompanyInfo.class, "companyName=? and type=?", new Object[]{twoCode.getYwCompanyName(),"维保"});
+						if(companyInfo == null) {
+							//领用人单位不存在
+							companyNoExistCount ++;
+							companyNoExist = companyNoExist + ", " + twoCode.getRegistNumber();
+							//计数第几行
+							rowNum ++;
+							continue;
+						} else {
+							twoCode.setYwCompanyId(companyInfo.getId());
+						}
+					}
+					if(twocodeInfo.getInfoState() != 0) {
+						//已经被领用或者被粘贴了
+						failDataCount ++;
+						failData.add(twocodeInfo);
+						//计数第几行
+						rowNum ++;
+						continue;
+					}
+					//更新数据
+					TwoCodeInfo.updateAll(TwoCodeInfo.class, "infoState=?,ywcompanyId=?,userName=?,loginName=?,rtime=?", new Object[]{1, twoCode.getYwCompanyId(),twoCode.getUserName(),twoCode.getLoginName(),twoCode.getRtime()},"registNumber=?" ,new Object[]{twoCode.getRegistNumber()});
+					exportSuccess ++;
+				}
+				//计数第几行
+				rowNum ++;
+			}
+			if(!"".equals(incomplete))
+				incomplete = incomplete.substring(2);
+			if(!"".equals(registNumberNoExist))
+				registNumberNoExist = registNumberNoExist.substring(2);
+			if(!"".equals(companyNoExist))
+				companyNoExist = companyNoExist.substring(2);
+			result.put("exportSuccess", exportSuccess);
+			result.put("registNumberNoExistCount", registNumberNoExistCount);
+			result.put("companyNoExistCount", companyNoExistCount);
+			result.put("incompleteCount", incompleteCount);
+			result.put("incomplete", incomplete);
+			result.put("registNumberNoExist", registNumberNoExist);
+			result.put("companyNoExist", companyNoExist);
+			result.put("failDataCount", failDataCount);
+			result.put("failData", failData);
+			result.put("exportFailer", registNumberNoExistCount + companyNoExistCount + incompleteCount + failDataCount);
+			result.put("success", "success");
+		}catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			result.put("success", "failer");
+		} finally {
+			//释放资源
+			try {
+				workBook.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return new JsonView(result);
 	}
 
 } 

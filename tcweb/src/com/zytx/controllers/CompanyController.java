@@ -8,7 +8,16 @@ import java.util.Map;
 
 import javax.servlet.http.Cookie;
 
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -1359,57 +1368,122 @@ public class CompanyController extends ApplicationController{
 		 try {
 			 //获取模板的输入流
 	        //InputStream inputStream = CompanyController.class.getClassLoader().getResourceAsStream("templates/companyinfo.xlsx");
-			 InputStream inputStream = new FileInputStream("C:/Users/HRF/Desktop/维保单位核实信息.xlsx");
+			 //InputStream inputStream = new FileInputStream("C:/Users/HRF/Desktop/维保单位核实信息.xlsx");
 	        //导出数据
 	        List<YwCompanyInfo> items = YwCompanyInfo.findAll(YwCompanyInfo.class);
 	        //获取模板的工作薄
-	        XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
-	        XSSFSheet sheetAt = workbook.getSheetAt(0);
+	        //XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
+	        XSSFWorkbook workbook = new XSSFWorkbook();
+	        XSSFSheet sheetAt = workbook.createSheet("备案信息");
+	        // 设置表格默认列宽度为15个字节  
+	        sheetAt.setDefaultColumnWidth((short) 30);  
+	        // 生成一个样式  
+	        XSSFCellStyle style = workbook.createCellStyle();  
+	       
+	        // 设置这些样式  
+	      //设置这些样式  
+	        style.setFillForegroundColor(HSSFColor.HSSFColorPredefined.PALE_BLUE.getIndex());  //設置單元格背景
+	        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);   //設置背景填充模式
+	        style.setBorderBottom(BorderStyle.THIN);    
+	        style.setBorderLeft(BorderStyle.THIN);  
+	        style.setBorderRight(BorderStyle.THIN);  
+	        style.setBorderTop(BorderStyle.THIN);  
+	        style.setAlignment(HorizontalAlignment.CENTER);   
+	        // 生成一个字体  
+	        XSSFFont font = workbook.createFont();  
+	        font.setColor(HSSFColor.HSSFColorPredefined.BLACK.getIndex());  
+	        font.setBold(true);
+	        font.setFontHeightInPoints((short)16);
+	        // 把字体应用到当前的样式  
+	        style.setFont(font); 
+	     // 生成并设置另一个样式,用于设置内容样式  
+	        XSSFCellStyle style2 = workbook.createCellStyle();  
+	        style2.setFillForegroundColor(HSSFColor.HSSFColorPredefined.WHITE.getIndex());  
+	        style2.setFillPattern(FillPatternType.SOLID_FOREGROUND);  
+	        style2.setBorderBottom(BorderStyle.THIN);  
+	        style2.setBorderLeft(BorderStyle.THIN);  
+	        style2.setBorderRight(BorderStyle.THIN);  
+	        style2.setBorderTop(BorderStyle.THIN);  
+	        style2.setAlignment(HorizontalAlignment.CENTER);  
+	        style2.setVerticalAlignment(VerticalAlignment.CENTER);  
+	        // 生成另一个字体  
+	        XSSFFont font2 = workbook.createFont(); 
+	        font2.setFontHeightInPoints((short)14);
+	        font2.setBold(false);  
+	        // 把字体应用到当前的样式  
+	        style2.setFont(font2);  
 	        //创建标题栏
 	        XSSFRow row = null;
 	        XSSFCell cell = null;
+	        String[] headers = new String[]{"单位名称","单位编码","单位注册地址","单位办公地址","联系人","联系人电话","负责人","负责人电话","值班电话","办公电话","办公场所证明","所在区域","安全管理员","许可证编号","资质类型","资质级别","资质有效期","备注","备案人员","备案时间"};
+	        row = sheetAt.createRow(0);
+	        for (int i = 0;i < headers.length;i ++) {
+	        	cell = row.createCell(i);
+	        	cell.setCellValue(headers[i]);
+	        	cell.setCellStyle(style);
+	        }
 	        for (int i = 0; i < items.size(); i ++) {
 	        	row = sheetAt.createRow(i + 1);
 	        	cell = row.createCell(0);
 	        	cell.setCellValue(items.get(i).getCompanyName());
+	        	cell.setCellStyle(style2);
 		        cell = row.createCell(1);
 		        cell.setCellValue(items.get(i).getCompanyCode());
+		        cell.setCellStyle(style2);
 		        cell = row.createCell(2);
 		        cell.setCellValue(items.get(i).getRegistAddress());
+		        cell.setCellStyle(style2);
 		        cell = row.createCell(3);
 		        cell.setCellValue(items.get(i).getAddress());
+		        cell.setCellStyle(style2);
 		        cell = row.createCell(4);
 		        cell.setCellValue(items.get(i).getContact());
+		        cell.setCellStyle(style2);
 		        cell = row.createCell(5);
 		        cell.setCellValue(items.get(i).getContactTel());
+		        cell.setCellStyle(style2);
 		        cell = row.createCell(6);
 		        cell.setCellValue(items.get(i).getRepresentativor());
+		        cell.setCellStyle(style2);
 		        cell = row.createCell(7);
 		        cell.setCellValue(items.get(i).getRepresentativorTel());
+		        cell.setCellStyle(style2);
 		        cell = row.createCell(8);
 		        cell.setCellValue(items.get(i).getPhone());
+		        cell.setCellStyle(style2);
 		        cell = row.createCell(9);
 		        cell.setCellValue(items.get(i).getTelephone());
+		        cell.setCellStyle(style2);
 		        cell = row.createCell(10);
 		        cell.setCellValue(items.get(i).getOfficeProof());
+		        cell.setCellStyle(style2);
 		        cell = row.createCell(11);
 		        cell.setCellValue(items.get(i).getArea());
+		        cell.setCellStyle(style2);
 		        cell = row.createCell(12);
 		        cell.setCellValue(items.get(i).getSafeyManPerson());
+		        cell.setCellStyle(style2);
 		        cell = row.createCell(13);
 		        cell.setCellValue(items.get(i).getCertificateCode());
+		        cell.setCellStyle(style2);
 		        cell = row.createCell(14);
 		        cell.setCellValue(items.get(i).getType());
+		        cell.setCellStyle(style2);
 		        cell = row.createCell(15);
 		        cell.setCellValue(items.get(i).getQlevel());
+		        cell.setCellStyle(style2);
 		        cell = row.createCell(16);
 		        cell.setCellValue(items.get(i).getValidity());
+		        cell.setCellStyle(style2);
 		        cell = row.createCell(17);
 		        cell.setCellValue(items.get(i).getNote());
+		        cell.setCellStyle(style2);
 		        cell = row.createCell(18);
 		        cell.setCellValue(items.get(i).getFilingPerson());
+		        cell.setCellStyle(style2);
 		        cell = row.createCell(19);
 		        cell.setCellValue(items.get(i).getFilingDate());
+		        cell.setCellStyle(style2);
 			}
 	        String filename = "维保单位信息.xlsx";
 	        response.setContentType("application/ms-excel;charset=UTF-8");  
@@ -1419,7 +1493,7 @@ public class CompanyController extends ApplicationController{
 	        workbook.write(out);
 	        out.flush();  
 	        out.close();
-	        inputStream.close();
+	        //inputStream.close();
 	        workbook.close();
 	        return "导出成功!";
 		 }catch(Exception e) {

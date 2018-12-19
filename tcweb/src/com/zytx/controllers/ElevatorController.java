@@ -1,7 +1,10 @@
 package com.zytx.controllers;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
@@ -38,6 +41,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.util.StringUtil;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.alibaba.fastjson.JSON;
@@ -5164,19 +5170,19 @@ public class ElevatorController extends ApplicationController{
 			  if(!"".equals(conditions)){
 			//	  sql ="select isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime2,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber where  "+ conditions;  
 				  if("1".equals(cityName)){
-				     sql ="select isnull(t.shibieCode,'') as shibieCode,isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime2,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber where  "+ conditions;	  
+				     sql ="select isnull(t.shibieCode,'') as shibieCode,isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber where  "+ conditions;	  
 				  }
 				  else{
-				     sql ="select isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime2,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber where  "+ conditions;  
+				     sql ="select isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber where  "+ conditions;  
 				  } 
 				  conditionsSql = "select count(*) from DdTwoCodeElevatorYwCompanyInfo  t  where "+ conditions;
 		   		 }
 		   	else{
 		   		  if("1".equals(cityName)){
-		   			  sql ="select isnull(t.shibieCode,'') as shibieCode,isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime2,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber  ";	 	 
+		   			  sql ="select isnull(t.shibieCode,'') as shibieCode,isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber  ";	 	 
 		   		  }
 		   		  else{
-		   		     sql ="select isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime2,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber  ";
+		   		     sql ="select isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber  ";
 		   		  }
 		   		  conditionsSql = "select count(*) from DdTwoCodeElevatorYwCompanyInfo  t  ";
 		   					 
@@ -15078,7 +15084,7 @@ public View queryKpinfoListMul(YwKaoPingInfoVO info){
 	
 	//根据电梯地址更新坐标
 	public String updateCoordinate() throws Exception {
-		String sql = "select id,precise,address from TwoCodeElevatorInfo where precise is null or precise!=2";
+		String sql = "select id,precise,address from TwoCodeElevatorInfo where precise is null";
 		long count = ElevaltorInfo.count(ElevaltorInfo.class, "precise is null or precise!=2", null);
 		List<ElevaltorInfo> items = null;
 		for(int i = 1; i <= Math.ceil(count/500); i ++) {
@@ -15105,6 +15111,8 @@ public View queryKpinfoListMul(YwKaoPingInfoVO info){
 		        item.setMap_Y(jsonObject.getString("lat"));
 		        item.setPrecise(result.getString("precise"));
 		    }else{
+		    	item.setMap_X("0.000000");
+		        item.setMap_Y("0.000000");
 		        item.setPrecise("0");
 
 		    }
@@ -15198,5 +15206,485 @@ public View queryKpinfoListMul(YwKaoPingInfoVO info){
 
 	    }*/
 	}
+	
+	//1.三个坐标误差都小于200m的以96933坐标为准
+	public void confirmCoordinateByAll() {
+		try{
+			//查询出三个坐标误差都小于200m的电梯数据
+			String sql = "select id,isnull(registNumber,'') as registNumber,isnull(address,'') as address,isnull(registCode,'') as registCode,isnull(emap_X,'') as emap_X,isnull(emap_Y,'') as emap_Y,isnull(dmap_X,'') as dmap_X,isnull(dmap_Y,'') as dmap_Y,isnull(pmap_X,'') as pmap_X,isnull(pmap_Y,'') as pmap_Y,eddistance,epdistance,dpdistance" + 
+					" from (select e.dealCoordinate,e.id,e.registNumber,e.address,e.registCode," +
+					" case when LEFT(e.map_X,1)='0' then '' else e.map_X end as emap_X," +
+					" case when LEFT(e.map_Y,1)='0' then '' else e.map_Y end as emap_Y," +
+					" case when LEFT(d.map_X,1)='0' then '' else d.map_X end as dmap_X," +
+					" case when LEFT(d.map_Y,1)='0' then '' else d.map_Y end as dmap_Y," +
+					" case when LEFT(p.map_X,1)='0' then '' else p.map_X end as pmap_X," +
+					" case when LEFT(p.map_Y,1)='0' then '' else p.map_Y end as pmap_Y," +
+					" case when LEFT(d.map_X,1)='0' or LEFT(d.map_Y,1)='0' or LEFT(e.map_X,1)='0' or LEFT(e.map_Y,1)='0' or d.map_X='' or d.map_Y='' or e.map_X='' or e.map_Y='' then null else ACOS(SIN((d.map_Y * PI()) / 180) * SIN((e.map_Y * PI()) / 180) + COS((d.map_Y * PI()) / 180) * COS((e.map_Y * PI()) / 180) * COS((d.map_X * PI()) / 180 - (e.map_X * PI()) / 180)) * 6378.137*1000 end as eddistance," +
+					" case when LEFT(p.map_X,1)='0' or LEFT(p.map_Y,1)='0' or LEFT(e.map_X,1)='0' or LEFT(e.map_Y,1)='0' or p.map_X='' or p.map_Y='' or e.map_X='' or e.map_Y='' then null else ACOS(SIN((e.map_Y * PI()) / 180) * SIN((p.map_Y * PI()) / 180) + COS((e.map_Y * PI()) / 180) * COS((p.map_Y * PI()) / 180) * COS((e.map_X * PI()) / 180 - (p.map_X * PI()) / 180)) * 6378.137*1000 end as epdistance," +
+					" case when LEFT(p.map_X,1)='0' or LEFT(p.map_Y,1)='0' or LEFT(d.map_X,1)='0' or LEFT(d.map_Y,1)='0' or p.map_X='' or p.map_Y='' or d.map_X='' or d.map_Y='' then null else ACOS(SIN((d.map_Y * PI()) / 180) * SIN((p.map_Y * PI()) / 180) + COS((d.map_Y * PI()) / 180) * COS((p.map_Y * PI()) / 180) * COS((d.map_X * PI()) / 180 - (p.map_X * PI()) / 180)) * 6378.137*1000 end as dpdistance" +
+					" from TwoCodeElevatorInfo e left join TwoCodeDdElevatorInfo d on e.registNumber=d.registNumber left join Twocode96333pdetailInfo p on d.registNumber=p.registNumber) t where t.eddistance<=200 and t.epdistance<=200 and t.dpdistance<=200 and (dealCoordinate=0 or dealCoordinate is null) ORDER BY registNumber ";
+			List<ElevatorCoordinate> elevators = ElevatorCoordinate.findBySql(ElevatorCoordinate.class, sql, null);
+			//三个坐标误差都小于200m的以96933坐标为准
+			for (ElevatorCoordinate elevator : elevators) {
+				ElevatorCoordinate.updateAll(ElevatorCoordinate.class, "map_X=?,map_Y=?,dealCoordinate=?", new Object[]{elevator.getPmap_X(),elevator.getPmap_Y(),1}, "id=?", new Object[]{elevator.getId()});
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	//2.96933坐标与粘贴库坐标误差小于250m的以96933坐标为准
+	public void confirmCoordinateBypddistance() {
+		try {
+			//查询出96933坐标与粘贴库坐标误差小于250m的电梯
+			String sql = "select id,isnull(registNumber,'') as registNumber,isnull(address,'') as address,isnull(registCode,'') as registCode,isnull(emap_X,'') as emap_X,isnull(emap_Y,'') as emap_Y,isnull(dmap_X,'') as dmap_X,isnull(dmap_Y,'') as dmap_Y,isnull(pmap_X,'') as pmap_X,isnull(pmap_Y,'') as pmap_Y,eddistance,epdistance,dpdistance" + 
+						" from (select e.dealCoordinate,e.id,e.registNumber,e.address,e.registCode," +
+						" case when LEFT(e.map_X,1)='0' then '' else e.map_X end as emap_X," +
+						" case when LEFT(e.map_Y,1)='0' then '' else e.map_Y end as emap_Y," +
+						" case when LEFT(d.map_X,1)='0' then '' else d.map_X end as dmap_X," +
+						" case when LEFT(d.map_Y,1)='0' then '' else d.map_Y end as dmap_Y," +
+						" case when LEFT(p.map_X,1)='0' then '' else p.map_X end as pmap_X," +
+						" case when LEFT(p.map_Y,1)='0' then '' else p.map_Y end as pmap_Y," +
+						" case when LEFT(d.map_X,1)='0' or LEFT(d.map_Y,1)='0' or LEFT(e.map_X,1)='0' or LEFT(e.map_Y,1)='0' or d.map_X='' or d.map_Y='' or e.map_X='' or e.map_Y='' then null else ACOS(SIN((d.map_Y * PI()) / 180) * SIN((e.map_Y * PI()) / 180) + COS((d.map_Y * PI()) / 180) * COS((e.map_Y * PI()) / 180) * COS((d.map_X * PI()) / 180 - (e.map_X * PI()) / 180)) * 6378.137*1000 end as eddistance," +
+						" case when LEFT(p.map_X,1)='0' or LEFT(p.map_Y,1)='0' or LEFT(e.map_X,1)='0' or LEFT(e.map_Y,1)='0' or p.map_X='' or p.map_Y='' or e.map_X='' or e.map_Y='' then null else ACOS(SIN((e.map_Y * PI()) / 180) * SIN((p.map_Y * PI()) / 180) + COS((e.map_Y * PI()) / 180) * COS((p.map_Y * PI()) / 180) * COS((e.map_X * PI()) / 180 - (p.map_X * PI()) / 180)) * 6378.137*1000 end as epdistance," +
+						" case when LEFT(p.map_X,1)='0' or LEFT(p.map_Y,1)='0' or LEFT(d.map_X,1)='0' or LEFT(d.map_Y,1)='0' or p.map_X='' or p.map_Y='' or d.map_X='' or d.map_Y='' then null else ACOS(SIN((d.map_Y * PI()) / 180) * SIN((p.map_Y * PI()) / 180) + COS((d.map_Y * PI()) / 180) * COS((p.map_Y * PI()) / 180) * COS((d.map_X * PI()) / 180 - (p.map_X * PI()) / 180)) * 6378.137*1000 end as dpdistance" +
+						" from TwoCodeElevatorInfo e left join TwoCodeDdElevatorInfo d on e.registNumber=d.registNumber left join Twocode96333pdetailInfo p on d.registNumber=p.registNumber) t where t.dpdistance<=250 and (dealCoordinate=0 or dealCoordinate is null) ORDER BY registNumber ";
+			List<ElevatorCoordinate> elevators = ElevatorCoordinate.findBySql(ElevatorCoordinate.class, sql, null);
+			//96933坐标与粘贴库坐标误差小于250m的以96933坐标为准
+			for (ElevatorCoordinate elevator : elevators) {
+				ElevatorCoordinate.updateAll(ElevatorCoordinate.class, "map_X=?,map_Y=?,dealCoordinate=?", new Object[]{elevator.getPmap_X(),elevator.getPmap_Y(),2}, "id=?", new Object[]{elevator.getId()});
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	//3.96933坐标与电梯库坐标误差小于250m的以96933坐标为准
+		public void confirmCoordinateByepdistance() {
+			try {
+				//查询出96933坐标与电梯库坐标误差小于250m的电梯
+				String sql = "select id,isnull(registNumber,'') as registNumber,isnull(address,'') as address,isnull(registCode,'') as registCode,isnull(emap_X,'') as emap_X,isnull(emap_Y,'') as emap_Y,isnull(dmap_X,'') as dmap_X,isnull(dmap_Y,'') as dmap_Y,isnull(pmap_X,'') as pmap_X,isnull(pmap_Y,'') as pmap_Y,eddistance,epdistance,dpdistance" + 
+							" from (select e.dealCoordinate,e.id,e.registNumber,e.address,e.registCode," +
+							" case when LEFT(e.map_X,1)='0' then '' else e.map_X end as emap_X," +
+							" case when LEFT(e.map_Y,1)='0' then '' else e.map_Y end as emap_Y," +
+							" case when LEFT(d.map_X,1)='0' then '' else d.map_X end as dmap_X," +
+							" case when LEFT(d.map_Y,1)='0' then '' else d.map_Y end as dmap_Y," +
+							" case when LEFT(p.map_X,1)='0' then '' else p.map_X end as pmap_X," +
+							" case when LEFT(p.map_Y,1)='0' then '' else p.map_Y end as pmap_Y," +
+							" case when LEFT(d.map_X,1)='0' or LEFT(d.map_Y,1)='0' or LEFT(e.map_X,1)='0' or LEFT(e.map_Y,1)='0' or d.map_X='' or d.map_Y='' or e.map_X='' or e.map_Y='' then null else ACOS(SIN((d.map_Y * PI()) / 180) * SIN((e.map_Y * PI()) / 180) + COS((d.map_Y * PI()) / 180) * COS((e.map_Y * PI()) / 180) * COS((d.map_X * PI()) / 180 - (e.map_X * PI()) / 180)) * 6378.137*1000 end as eddistance," +
+							" case when LEFT(p.map_X,1)='0' or LEFT(p.map_Y,1)='0' or LEFT(e.map_X,1)='0' or LEFT(e.map_Y,1)='0' or p.map_X='' or p.map_Y='' or e.map_X='' or e.map_Y='' then null else ACOS(SIN((e.map_Y * PI()) / 180) * SIN((p.map_Y * PI()) / 180) + COS((e.map_Y * PI()) / 180) * COS((p.map_Y * PI()) / 180) * COS((e.map_X * PI()) / 180 - (p.map_X * PI()) / 180)) * 6378.137*1000 end as epdistance," +
+							" case when LEFT(p.map_X,1)='0' or LEFT(p.map_Y,1)='0' or LEFT(d.map_X,1)='0' or LEFT(d.map_Y,1)='0' or p.map_X='' or p.map_Y='' or d.map_X='' or d.map_Y='' then null else ACOS(SIN((d.map_Y * PI()) / 180) * SIN((p.map_Y * PI()) / 180) + COS((d.map_Y * PI()) / 180) * COS((p.map_Y * PI()) / 180) * COS((d.map_X * PI()) / 180 - (p.map_X * PI()) / 180)) * 6378.137*1000 end as dpdistance" +
+							" from TwoCodeElevatorInfo e left join TwoCodeDdElevatorInfo d on e.registNumber=d.registNumber left join Twocode96333pdetailInfo p on d.registNumber=p.registNumber) t where t.epdistance<=250 and (dealCoordinate=0 or dealCoordinate is null) ORDER BY registNumber ";
+				List<ElevatorCoordinate> elevators = ElevatorCoordinate.findBySql(ElevatorCoordinate.class, sql, null);
+				//96933坐标与电梯库坐标误差小于250m的以96933坐标为准
+				for (ElevatorCoordinate elevator : elevators) {
+					ElevatorCoordinate.updateAll(ElevatorCoordinate.class, "map_X=?,map_Y=?,dealCoordinate=?", new Object[]{elevator.getPmap_X(),elevator.getPmap_Y(),3}, "id=?", new Object[]{elevator.getId()});
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		//4.电梯库坐标与粘贴库坐标误差小于500m的以粘贴库为准
+				public void confirmCoordinateByeddistance() {
+					try {
+						//查询出电梯库坐标与粘贴库坐标误差小于500m的电梯
+						String sql = "select id,isnull(registNumber,'') as registNumber,isnull(address,'') as address,isnull(registCode,'') as registCode,isnull(emap_X,'') as emap_X,isnull(emap_Y,'') as emap_Y,isnull(dmap_X,'') as dmap_X,isnull(dmap_Y,'') as dmap_Y,isnull(pmap_X,'') as pmap_X,isnull(pmap_Y,'') as pmap_Y,eddistance,epdistance,dpdistance" + 
+									" from (select e.dealCoordinate,e.id,e.registNumber,e.address,e.registCode," +
+									" case when LEFT(e.map_X,1)='0' then '' else e.map_X end as emap_X," +
+									" case when LEFT(e.map_Y,1)='0' then '' else e.map_Y end as emap_Y," +
+									" case when LEFT(d.map_X,1)='0' then '' else d.map_X end as dmap_X," +
+									" case when LEFT(d.map_Y,1)='0' then '' else d.map_Y end as dmap_Y," +
+									" case when LEFT(p.map_X,1)='0' then '' else p.map_X end as pmap_X," +
+									" case when LEFT(p.map_Y,1)='0' then '' else p.map_Y end as pmap_Y," +
+									" case when LEFT(d.map_X,1)='0' or LEFT(d.map_Y,1)='0' or LEFT(e.map_X,1)='0' or LEFT(e.map_Y,1)='0' or d.map_X='' or d.map_Y='' or e.map_X='' or e.map_Y='' then null else ACOS(SIN((d.map_Y * PI()) / 180) * SIN((e.map_Y * PI()) / 180) + COS((d.map_Y * PI()) / 180) * COS((e.map_Y * PI()) / 180) * COS((d.map_X * PI()) / 180 - (e.map_X * PI()) / 180)) * 6378.137*1000 end as eddistance," +
+									" case when LEFT(p.map_X,1)='0' or LEFT(p.map_Y,1)='0' or LEFT(e.map_X,1)='0' or LEFT(e.map_Y,1)='0' or p.map_X='' or p.map_Y='' or e.map_X='' or e.map_Y='' then null else ACOS(SIN((e.map_Y * PI()) / 180) * SIN((p.map_Y * PI()) / 180) + COS((e.map_Y * PI()) / 180) * COS((p.map_Y * PI()) / 180) * COS((e.map_X * PI()) / 180 - (p.map_X * PI()) / 180)) * 6378.137*1000 end as epdistance," +
+									" case when LEFT(p.map_X,1)='0' or LEFT(p.map_Y,1)='0' or LEFT(d.map_X,1)='0' or LEFT(d.map_Y,1)='0' or p.map_X='' or p.map_Y='' or d.map_X='' or d.map_Y='' then null else ACOS(SIN((d.map_Y * PI()) / 180) * SIN((p.map_Y * PI()) / 180) + COS((d.map_Y * PI()) / 180) * COS((p.map_Y * PI()) / 180) * COS((d.map_X * PI()) / 180 - (p.map_X * PI()) / 180)) * 6378.137*1000 end as dpdistance" +
+									" from TwoCodeElevatorInfo e left join TwoCodeDdElevatorInfo d on e.registNumber=d.registNumber left join Twocode96333pdetailInfo p on d.registNumber=p.registNumber) t where t.eddistance<=500 and (dealCoordinate=0 or dealCoordinate is null) ORDER BY registNumber ";
+						List<ElevatorCoordinate> elevators = ElevatorCoordinate.findBySql(ElevatorCoordinate.class, sql, null);
+						//电梯库坐标与粘贴库坐标误差小于500m的以粘贴库坐标为准
+						for (ElevatorCoordinate elevator : elevators) {
+							ElevatorCoordinate.updateAll(ElevatorCoordinate.class, "map_X=?,map_Y=?,dealCoordinate=?", new Object[]{elevator.getDmap_X(),elevator.getDmap_Y(),4}, "id=?", new Object[]{elevator.getId()});
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				
+				//5.96933坐标与电梯库坐标误差小于1000m的以96933坐标为准
+				public void confirmCoordinateByepdistance1() {
+					try {
+						//查询出96933坐标与电梯库坐标误差小于1000m的电梯
+						String sql = "select id,isnull(registNumber,'') as registNumber,isnull(address,'') as address,isnull(registCode,'') as registCode,isnull(emap_X,'') as emap_X,isnull(emap_Y,'') as emap_Y,isnull(dmap_X,'') as dmap_X,isnull(dmap_Y,'') as dmap_Y,isnull(pmap_X,'') as pmap_X,isnull(pmap_Y,'') as pmap_Y,eddistance,epdistance,dpdistance" + 
+									" from (select e.dealCoordinate,e.id,e.registNumber,e.address,e.registCode," +
+									" case when LEFT(e.map_X,1)='0' then '' else e.map_X end as emap_X," +
+									" case when LEFT(e.map_Y,1)='0' then '' else e.map_Y end as emap_Y," +
+									" case when LEFT(d.map_X,1)='0' then '' else d.map_X end as dmap_X," +
+									" case when LEFT(d.map_Y,1)='0' then '' else d.map_Y end as dmap_Y," +
+									" case when LEFT(p.map_X,1)='0' then '' else p.map_X end as pmap_X," +
+									" case when LEFT(p.map_Y,1)='0' then '' else p.map_Y end as pmap_Y," +
+									" case when LEFT(d.map_X,1)='0' or LEFT(d.map_Y,1)='0' or LEFT(e.map_X,1)='0' or LEFT(e.map_Y,1)='0' or d.map_X='' or d.map_Y='' or e.map_X='' or e.map_Y='' then null else ACOS(SIN((d.map_Y * PI()) / 180) * SIN((e.map_Y * PI()) / 180) + COS((d.map_Y * PI()) / 180) * COS((e.map_Y * PI()) / 180) * COS((d.map_X * PI()) / 180 - (e.map_X * PI()) / 180)) * 6378.137*1000 end as eddistance," +
+									" case when LEFT(p.map_X,1)='0' or LEFT(p.map_Y,1)='0' or LEFT(e.map_X,1)='0' or LEFT(e.map_Y,1)='0' or p.map_X='' or p.map_Y='' or e.map_X='' or e.map_Y='' then null else ACOS(SIN((e.map_Y * PI()) / 180) * SIN((p.map_Y * PI()) / 180) + COS((e.map_Y * PI()) / 180) * COS((p.map_Y * PI()) / 180) * COS((e.map_X * PI()) / 180 - (p.map_X * PI()) / 180)) * 6378.137*1000 end as epdistance," +
+									" case when LEFT(p.map_X,1)='0' or LEFT(p.map_Y,1)='0' or LEFT(d.map_X,1)='0' or LEFT(d.map_Y,1)='0' or p.map_X='' or p.map_Y='' or d.map_X='' or d.map_Y='' then null else ACOS(SIN((d.map_Y * PI()) / 180) * SIN((p.map_Y * PI()) / 180) + COS((d.map_Y * PI()) / 180) * COS((p.map_Y * PI()) / 180) * COS((d.map_X * PI()) / 180 - (p.map_X * PI()) / 180)) * 6378.137*1000 end as dpdistance" +
+									" from TwoCodeElevatorInfo e left join TwoCodeDdElevatorInfo d on e.registNumber=d.registNumber left join Twocode96333pdetailInfo p on d.registNumber=p.registNumber) t where t.epdistance<=1000 and (dealCoordinate=0 or dealCoordinate is null) ORDER BY registNumber ";
+						List<ElevatorCoordinate> elevators = ElevatorCoordinate.findBySql(ElevatorCoordinate.class, sql, null);
+						//96933坐标与电梯库坐标误差小于1000m的以96933坐标为准
+						for (ElevatorCoordinate elevator : elevators) {
+							ElevatorCoordinate.updateAll(ElevatorCoordinate.class, "map_X=?,map_Y=?,dealCoordinate=?", new Object[]{elevator.getPmap_X(),elevator.getPmap_Y(),5}, "id=?", new Object[]{elevator.getId()});
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}	
+				
+				//6.电梯库坐标与粘贴库坐标误差小于1000m的以粘贴库为准
+				public void confirmCoordinateByeddistance1() {
+					try {
+						//查询出电梯库坐标与粘贴库坐标误差小于1000m的电梯
+						String sql = "select id,isnull(registNumber,'') as registNumber,isnull(address,'') as address,isnull(registCode,'') as registCode,isnull(emap_X,'') as emap_X,isnull(emap_Y,'') as emap_Y,isnull(dmap_X,'') as dmap_X,isnull(dmap_Y,'') as dmap_Y,isnull(pmap_X,'') as pmap_X,isnull(pmap_Y,'') as pmap_Y,eddistance,epdistance,dpdistance" + 
+									" from (select e.dealCoordinate,e.id,e.registNumber,e.address,e.registCode," +
+									" case when LEFT(e.map_X,1)='0' then '' else e.map_X end as emap_X," +
+									" case when LEFT(e.map_Y,1)='0' then '' else e.map_Y end as emap_Y," +
+									" case when LEFT(d.map_X,1)='0' then '' else d.map_X end as dmap_X," +
+									" case when LEFT(d.map_Y,1)='0' then '' else d.map_Y end as dmap_Y," +
+									" case when LEFT(p.map_X,1)='0' then '' else p.map_X end as pmap_X," +
+									" case when LEFT(p.map_Y,1)='0' then '' else p.map_Y end as pmap_Y," +
+									" case when LEFT(d.map_X,1)='0' or LEFT(d.map_Y,1)='0' or LEFT(e.map_X,1)='0' or LEFT(e.map_Y,1)='0' or d.map_X='' or d.map_Y='' or e.map_X='' or e.map_Y='' then null else ACOS(SIN((d.map_Y * PI()) / 180) * SIN((e.map_Y * PI()) / 180) + COS((d.map_Y * PI()) / 180) * COS((e.map_Y * PI()) / 180) * COS((d.map_X * PI()) / 180 - (e.map_X * PI()) / 180)) * 6378.137*1000 end as eddistance," +
+									" case when LEFT(p.map_X,1)='0' or LEFT(p.map_Y,1)='0' or LEFT(e.map_X,1)='0' or LEFT(e.map_Y,1)='0' or p.map_X='' or p.map_Y='' or e.map_X='' or e.map_Y='' then null else ACOS(SIN((e.map_Y * PI()) / 180) * SIN((p.map_Y * PI()) / 180) + COS((e.map_Y * PI()) / 180) * COS((p.map_Y * PI()) / 180) * COS((e.map_X * PI()) / 180 - (p.map_X * PI()) / 180)) * 6378.137*1000 end as epdistance," +
+									" case when LEFT(p.map_X,1)='0' or LEFT(p.map_Y,1)='0' or LEFT(d.map_X,1)='0' or LEFT(d.map_Y,1)='0' or p.map_X='' or p.map_Y='' or d.map_X='' or d.map_Y='' then null else ACOS(SIN((d.map_Y * PI()) / 180) * SIN((p.map_Y * PI()) / 180) + COS((d.map_Y * PI()) / 180) * COS((p.map_Y * PI()) / 180) * COS((d.map_X * PI()) / 180 - (p.map_X * PI()) / 180)) * 6378.137*1000 end as dpdistance" +
+									" from TwoCodeElevatorInfo e left join TwoCodeDdElevatorInfo d on e.registNumber=d.registNumber left join Twocode96333pdetailInfo p on d.registNumber=p.registNumber) t where t.eddistance<=1000 and (dealCoordinate=0 or dealCoordinate is null) ORDER BY registNumber ";
+						List<ElevatorCoordinate> elevators = ElevatorCoordinate.findBySql(ElevatorCoordinate.class, sql, null);
+						//电梯库坐标与粘贴库坐标误差小于500m的以粘贴库坐标为准
+						for (ElevatorCoordinate elevator : elevators) {
+							ElevatorCoordinate.updateAll(ElevatorCoordinate.class, "map_X=?,map_Y=?,dealCoordinate=?", new Object[]{elevator.getDmap_X(),elevator.getDmap_Y(),6}, "id=?", new Object[]{elevator.getId()});
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				
+				//7.根据百度定位的坐标为准
+				public void confirmCoordinateBybd() {
+					try {
+						String sql = "select id,map_X,map_Y from TwoCodeElevatorInfo where (dealCoordinate=0 or dealCoordinate is null) and LEFT(map_X,1)!='0' and LEFT(map_Y,1)!='0'";
+						List<ElevaltorInfo> elevators = ElevaltorInfo.findBySql(ElevaltorInfo.class, sql, null);
+						for (ElevaltorInfo elevator : elevators) {
+							//检验坐标有效性，如果坐标有效
+							if(parseAddressByCoordinate(elevator.getMap_X(),elevator.getMap_Y())) {
+								ElevaltorInfo.updateAll(ElevaltorInfo.class, "dealCoordinate=?", new Object[]{7}, "id=?", new Object[]{elevator.getId()});
+							}
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				
+				//完成统计数据导出功能
+				public String detaskliststatisticExport(DdElevaltorInfoVO info) {
+					
+					//获取模板的输入流
+			        InputStream inputStream = null;
+			        XSSFSheet sheetAt = null;
+			        XSSFWorkbook workbook = null;
+					 try {
+						inputStream = new FileInputStream("C:/Users/HRF/Desktop/完成统计信息.xlsx");
+						//获取模板的工作薄
+						workbook = new XSSFWorkbook(inputStream);
+						sheetAt = workbook.getSheetAt(0);
+					} catch (FileNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+						return "导出异常,请尽快与管理员联系!";
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return "导出异常,请尽快与管理员联系!";
+					}
+					 XSSFRow row = null;
+				     XSSFCell cell = null;
+					 
+
+					 int recordSate =0;  //0:所有 1:未完成 2已完成
+					 int arrageType =1;  //0:所有 1:运维公司 2个人
+					 int pastePersonID =0;
+					 String qstartTime ="";
+					 String qendTime="";
+					 String buildingName="";
+					 String area ="";
+					 String registNumber ="";
+					 int shenhe =0;
+					 String deviceId2="0";
+					 String cityName = GlobalFunction.cityName;
+					 
+					 recordSate = info.getRecordSate();
+					 arrageType = info.getArrageType();
+					 pastePersonID = info.getPastePersonID();
+					 try {
+						qstartTime = new String(info.getQstartTime().getBytes("iso-8859-1"),"utf-8");
+						 qendTime = new String(info.getQendTime().getBytes("iso-8859-1"),"utf-8");
+						 buildingName = new String(info.getBuildingName().getBytes("iso-8859-1"),"utf-8");
+						 registNumber = new String(info.getRegistNumber().getBytes("iso-8859-1"),"utf-8");
+						 area  = new String(info.getArea().getBytes("iso-8859-1"),"utf-8");
+					} catch (UnsupportedEncodingException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+						return "导出异常,请尽快与管理员联系!";
+						
+					}
+					 shenhe =info.getShenhe();
+					 deviceId2=info.getDeviceId2();
+					 
+					 String sql = "";
+					 String conditions="";
+					 String conditionsSql="";
+					 
+					  if(!"".equals(registNumber)){
+							 if(!"".equals(conditions)){
+								 conditions =conditions+" and t.registNumber like '%"+registNumber+"%'";	
+								} 
+								else{
+								 conditions =" t.registNumber like '%"+registNumber+"%'";	
+								}
+							 
+						 }
+					  
+					  if(!"".equals(buildingName)){
+							 if(!"".equals(conditions)){
+								 conditions =conditions+" and t.buildingName like '%"+buildingName+"%'";	
+								} 
+								else{
+									conditions =" t.buildingName like '%"+buildingName+"%'";	
+								}
+							 
+						 }
+					  
+					  if(!"".equals(qstartTime)){
+							 if(!"".equals(conditions)){
+								 conditions =conditions+" and (case when t.recordSate = 1 then t.arrangeTime  else t.subTime2  end )  >= '"+qstartTime+"'" ;	 
+							 } 
+							 else{
+								 conditions =" (case when t.recordSate = 1 then t.arrangeTime  else t.subTime2  end )  >= '"+qstartTime+"'" ;	 
+							 }
+						 }
+						 
+						 if(!"".equals(qendTime)){
+							 if(!"".equals(conditions)){
+								 conditions =conditions+" and (case when t.recordSate = 1 then t.arrangeTime  else t.subTime2  end )  <= '"+qendTime+"'" ;	 
+							 } 
+							 else{
+								 conditions =" (case when t.recordSate = 1 then t.arrangeTime  else t.subTime2  end )  <= '"+qendTime+"'" ;	 
+							 }
+						 }
+						 
+						 if(arrageType >0){
+							 if(!"".equals(conditions)){
+								 conditions =conditions+" and t.arrageType = "+arrageType;	 
+							 } 
+							 else{
+								 conditions ="t.arrageType = "+arrageType;	  
+							 } 
+						 }
+						 
+						 if(pastePersonID >0){
+							 if(!"".equals(conditions)){
+								 conditions =conditions+" and t.pastePersonID = "+pastePersonID;	 
+							 } 
+							 else{
+								 conditions ="t.pastePersonID = "+pastePersonID;	  
+							 } 
+						 }
+						 
+						 if(recordSate ==1){
+							 if(!"".equals(conditions)){
+								 conditions =conditions+" and t.recordSate = "+recordSate;	 
+							 } 
+							 else{
+								 conditions ="t.recordSate = "+recordSate;	  
+							 } 
+						 }
+						 
+						 if(recordSate ==2){
+							 if(!"".equals(conditions)){
+								 conditions =conditions+" and t.recordSate > 1 ";	 
+							 } 
+							 else{
+								 conditions ="t.recordSate > 1 ";	  
+							 } 
+						 }
+						 
+						 if(recordSate ==0){
+							 if(!"".equals(conditions)){
+								 conditions =conditions+" and t.recordSate > 0 ";	 
+							 } 
+							 else{
+								 conditions ="t.recordSate > 0 ";	  
+							 } 
+						 }
+					  
+						 if(!"".equals(area)){
+							 if(!"".equals(conditions)){
+								 conditions =conditions+" and t.area like '%"+area+"%'";	
+								} 
+								else{
+									conditions =" t.area like '%"+area+"%'";	
+								}
+							 
+						 }
+						 
+						 if(shenhe < 2){
+							 if(!"".equals(conditions)){
+								 conditions =conditions+" and t.shenhe = "+shenhe;	 
+							 } 
+							 else{
+								 conditions ="t.shenhe = "+shenhe;	  
+							 } 
+						 }
+						 
+						 if("1".equals(deviceId2)){
+							 if(!"".equals(conditions)){
+								 conditions =conditions+" and (t.deviceId2 is not null and t.deviceId2 !="+"\'"+"\' ) ";	
+							 }
+							 else{
+								 conditions =" (t.deviceId2 is not null and t.deviceId2 !="+"\'"+"\' ) "; 
+							 } 
+						 }
+						 
+						 if("2".equals(deviceId2)){
+							 if(!"".equals(conditions)){
+								 conditions =conditions+" (t.deviceId2 is  null or t.deviceId2 ="+"\'"+"\' ) ";	
+							 }
+							 else{
+								 conditions =" (t.deviceId2 is  null or t.deviceId2 ="+"\'"+"\' ) "; 
+							 } 
+						 } 
+						 
+						  if(!"".equals(conditions)){
+						//	  sql ="select isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime2,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber where  "+ conditions;  
+							  if("1".equals(cityName)){
+							     sql ="select isnull(t.shibieCode,'') as shibieCode,isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName,case when CHARINDEX('.',cp.companyName)>0 or CHARINDEX('/',cp.companyName)>0 then '' else cp.companyName end as ywCompanyName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeCompanyInfo cp on te.companyid=cp.id left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber where  "+ conditions;	  
+							  }
+							  else{
+							     sql ="select isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName,case when CHARINDEX('.',cp.companyName)>0 or CHARINDEX('/',cp.companyName)>0 then '' else cp.companyName end as ywCompanyName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeCompanyInfo cp on te.companyid=cp.id left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber where  "+ conditions;  
+							  } 
+							  conditionsSql = "select count(*) from DdTwoCodeElevatorYwCompanyInfo  t  where "+ conditions;
+					   		 }
+					   	else{
+					   		  if("1".equals(cityName)){
+					   			  sql ="select isnull(t.shibieCode,'') as shibieCode,isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName,case when CHARINDEX('.',cp.companyName)>0 or CHARINDEX('/',cp.companyName)>0 then '' else cp.companyName end as ywCompanyName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeCompanyInfo cp on te.companyid=cp.id left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber  ";	 	 
+					   		  }
+					   		  else{
+					   		     sql ="select isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName,case when CHARINDEX('.',cp.companyName)>0 or CHARINDEX('/',cp.companyName)>0 then '' else cp.companyName end as ywCompanyName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeCompanyInfo cp on te.companyid=cp.id left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber  ";
+					   		  }
+					   		  conditionsSql = "select count(*) from DdTwoCodeElevatorYwCompanyInfo  t  ";
+					   					 
+					   	} 
+						 
+						     long total =0;
+						     List<DdTwoCodeElevatorYwCompanyInfo> items =null;
+							try {
+								total = DdTwoCodeElevatorYwCompanyInfo.countBySql(DdTwoCodeElevatorYwCompanyInfo.class, conditionsSql, null);
+								
+								
+							} catch (ActiveRecordException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} 
+							DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+							 int count = 1;
+							 for(int i = 1;i <= Math.floor(total/500) + 1; i ++) {
+								 try {
+									items=DdTwoCodeElevatorYwCompanyInfo.findBySql(DdTwoCodeElevatorYwCompanyInfo.class, sql, null, "t.id desc", 500, (i-1)*500);
+								} catch (ActiveRecordException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+									return "导出异常,请尽快与管理员联系!";
+								}
+								 if(items != null && items.size()>0){ 
+									 for(int j = 0;j < items.size();j ++){
+										 DdTwoCodeElevatorYwCompanyInfo  ddElevaltorInfoVO = items.get(j);
+										 int recordSate2  =ddElevaltorInfoVO.getRecordSate();
+										 if(recordSate2 >=1){
+											 int arrageType2 =ddElevaltorInfoVO.getArrageType();
+											 int pastePersonID2=ddElevaltorInfoVO.getPastePersonID();
+											 CompanyInfo companyInfo =null;
+											 try {
+												 if(arrageType2 ==1){   //分配给公司粘贴的任务
+													 companyInfo = CompanyInfo.findFirst(CompanyInfo.class, "id = ?", new Object[]{pastePersonID2});
+													 if(companyInfo != null)
+														 ddElevaltorInfoVO.setPastePersonName(companyInfo.getCompanyName());
+												 }
+												 else{   //分配给学生
+													 UserExtInfo  userExtInfo=UserExtInfo.findFirst(UserExtInfo.class, "userid = ?", new Object[]{pastePersonID2});
+													 if(userExtInfo != null)
+														 ddElevaltorInfoVO.setPastePersonName(userExtInfo.getUserName());
+												 }
+											 } catch (ActiveRecordException e) {
+												 
+												 e.printStackTrace();
+											 }
+										 }
+									        	row = sheetAt.createRow(count);
+									        	cell = row.createCell(0);
+									        	cell.setCellValue(ddElevaltorInfoVO.getRegistNumber());
+										        cell = row.createCell(1);
+										        cell.setCellValue(ddElevaltorInfoVO.getAddress());
+										        cell = row.createCell(2);
+										        cell.setCellValue(ddElevaltorInfoVO.getBuildingName());
+										        cell = row.createCell(3);
+										        cell.setCellValue(ddElevaltorInfoVO.getBuilding());
+										        cell = row.createCell(4);
+										        cell.setCellValue(ddElevaltorInfoVO.getUnit());
+										        cell = row.createCell(5);
+										        if(ddElevaltorInfoVO.getPastePersonName() == null || ddElevaltorInfoVO.getPastePersonName().length() == 0) {
+										        	cell.setCellValue(ddElevaltorInfoVO.getPastePersonName());
+										        } else {
+										        	cell.setCellValue((ddElevaltorInfoVO.getPastePersonName().contains(".") || ddElevaltorInfoVO.getPastePersonName().contains("/"))?"":ddElevaltorInfoVO.getPastePersonName());
+										        }
+										        cell = row.createCell(6);
+										        cell.setCellValue(dateFormat.format(ddElevaltorInfoVO.getArrangeTime()));
+										        cell = row.createCell(7);
+										        cell.setCellValue(ddElevaltorInfoVO.getSubPersonName());
+										        cell = row.createCell(8);
+										        cell.setCellValue(ddElevaltorInfoVO.getYwCompanyName());
+										        cell = row.createCell(9);
+										        cell.setCellValue(ddElevaltorInfoVO.getSubTime2());
+										        cell = row.createCell(10);
+										        if(ddElevaltorInfoVO.getRecordSate() == 1) {
+										        	cell.setCellValue("未完成");
+										        } else if (ddElevaltorInfoVO.getRecordSate() == 0) {
+										        	cell.setCellValue("未分配");
+										        } else {
+										        	cell.setCellValue("已完成");
+										        }
+										        
+										        cell = row.createCell(11);
+										        cell.setCellValue(ddElevaltorInfoVO.getRegistCode());
+										        cell = row.createCell(12);
+										        cell.setCellValue(ddElevaltorInfoVO.getUseNumber());
+										        count ++;
+									 } 
+								 }
+							 }
+							 String filename = "完成统计信息.xlsx";
+						        try {
+									response.setContentType("application/ms-excel;charset=UTF-8");
+									response.setHeader("Content-Disposition", "attachment;filename="
+											.concat(String.valueOf(URLEncoder.encode(filename, "UTF-8"))));
+									OutputStream out = response.getOutputStream();
+									workbook.write(out);
+									out.flush();
+									out.close();
+									inputStream.close();
+									workbook.close();
+								} catch (Exception e) {
+									// TODO: handle exception
+									e.printStackTrace();
+									return "导出异常,请尽快与管理员联系!";
+								}
+								return "导出成功!";
+							 
+				}
+				
+
  	 
 }

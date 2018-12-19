@@ -6,6 +6,7 @@
 <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/easyuibootstrap.css"> 
 <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/icon.css">
 <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/demo.css">
+<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/myeasyuiicon.css">
 <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/jquery.autocomplete.css">
 <script type="text/javascript" src="<%=request.getContextPath()%>/scripts/jquery-1.4.2.min.js"></script>
 <script type="text/javascript" src="<%=request.getContextPath()%>/scripts/jquery.easyui.min.js"></script>
@@ -288,6 +289,42 @@ $(function(){
 	    		 });   
 		     }	 
 	    }
+	    },'-',{
+	    	text:'excel导出',
+	    	iconCls:'icon-excel',
+	    	handler:function() {
+	    		$.messager.confirm('Confirm','确认导出备案数据?',function(r){ 
+            		if(r) {
+            			$.messager.show({
+		                    title:'提示信息',
+		                    msg:'请耐心等待!,正在导出...',
+		                    timeout:3000,
+		                    showType:'fade',
+		                    style:{
+		                        top:'45%'
+		                    }
+		                });
+            			var recordSate=$('#recordSate option:selected').val();  
+        	    	    var arrageType = $('#arrageType option:selected').val();
+        	    	    var pastePersonID=$('#pastePersonID').attr("value"); 
+        	    		var qstartTime=$('#qstartTime').datebox("getValue");  
+        	    		var qendTime=$('#qendTime').datebox("getValue"); 
+        	    		var buildingName=$('#buildingNameInfo').attr("value");
+        	    		var registNumber=$('#qregistNumber').attr("value");
+        	    		if(!pastePersonID)
+        	    			pastePersonID = 0;
+        	    	    var area =$('#areainfo').combobox('getValue'); 
+        	    	    var shenhe = $('#shenhe option:selected').val();
+
+        	    	    var deviceId2=$('#deviceId2 option:selected').val();  
+        	    	    var url='/tcweb/elevator/detaskliststatisticExport';
+        	    	    var queryParams= '?arrageType='+arrageType+'&pastePersonID='+pastePersonID+'&recordSate='+recordSate+'&qstartTime='+qstartTime+'&qendTime='+qendTime+'&buildingName='+buildingName+'&area='+area+'&shenhe='+shenhe+'&deviceId2='+deviceId2+'&registNumber='+registNumber;
+        	    	    //var queryParams={'arrageType':arrageType,'pastePersonID':pastePersonID,'recordSate':recordSate,'qstartTime':qstartTime,'qendTime':qendTime,'buildingName':buildingName,'area':area,'shenhe':shenhe,'deviceId2':deviceId2,'registNumber':registNumber};
+        	    	    window.location.href=encodeURI(url + queryParams);
+        	    	    //$.get(url,queryParams);
+            		}
+            	});
+	    	}
 	    }
 	    ]
 	    <% } %>   

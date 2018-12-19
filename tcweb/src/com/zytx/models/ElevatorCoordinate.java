@@ -34,6 +34,16 @@ public class ElevatorCoordinate extends ActiveRecordBase {
 	private String epdistance;
 	@Column
 	private String dpdistance;
+	@Column
+	private int dealCoordinate;
+	
+	
+	public int getDealCoordinate() {
+		return dealCoordinate;
+	}
+	public void setDealCoordinate(int dealCoordinate) {
+		this.dealCoordinate = dealCoordinate;
+	}
 	public int getId() {
 		return id;
 	}

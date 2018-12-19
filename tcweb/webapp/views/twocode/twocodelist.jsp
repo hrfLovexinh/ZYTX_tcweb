@@ -107,7 +107,8 @@ $.fn.datebox.defaults.formatter = function(date){
 		        }
 		    })
 		};
-
+		var daoRuUrl = "";
+		var daoRuWay = "";
 $(function(){
 
 	$.ajaxSetup ({
@@ -122,7 +123,10 @@ $(function(){
 	$('#lyflt').datagrid
 
 	win3 = $('#failure-window').window({minimizable:false,maximizable:false,collapsible:false,closed:true,draggable:false,modal:true,onClose:function(){$('#tt').datagrid('reload')} });   
-//	form2 = win2.find('form'); 
+	//	form2 = win2.find('form'); 
+	//批量导入
+	winDr = $('#car-windowDr').window({  closed:true,draggable:false,modal:true,minimizable:false,collapsible:false,maximizable:false});
+	winDrResult = $('#failure-window2').window({minimizable:false,maximizable:false,collapsible:false,closed:true,draggable:false,modal:true,onClose:function(){$('#tt').datagrid('reload')} });   
      var url = encodeURI(encodeURI('/tcweb/elevator/getAutoYwCompanyList')); 
  	 $("#ywCompanyIdinfo").autocomplete(  
  	            url,  
@@ -240,7 +244,7 @@ $(function(){
 	  	 pagination:true,
 	  	 singleSelect:true,
 	  	 striped:true,
-	  	 toolbar:[
+	  	 toolbar:[	
 	  	       {
 	  		        text:'入库',
 	  		        iconCls:'icon-add',
@@ -249,6 +253,28 @@ $(function(){
 	  		    //	form.form('clear');
 	  		    	form.url ='/tcweb/twocode/add';	
 	  		        }
+	  		    },{
+	  		 		text:'标签入库excel模板',
+	  		 		iconCls:'icon-redo',
+	  		 		handler: function() {
+	  		 			window.location.href="/tcweb/twocode/downLoad?way=ruku";
+	  		 		}
+	  	 		},{
+	  		    	text:'标签入库导入',
+	  		    	iconCls:'icon-redo',
+	  		    	handler: function() {
+	  		    		//$("#exportId").attr("onclick","rukuExport()");
+						//$('#exportId').unbind("click");
+	  		    		//$("#exportId").bind();
+	  		    		//$("#exportId").bind('click',rukuExport);
+	  		    		//$("#exportId").bind('change',rukuExport);
+	  		    		//$("#exportId").change(rukuExport);
+	  		    		daoRuUrl = "/tcweb/twocode/rukuExport";
+	  		    		daoRuWay = "ruku";
+	  		    		//winDr.window("open");
+	  		    		$("#daoruId").val("");
+	  		    		$("#daoruId").click();
+	  		    	}
 	  		    },{
 	  		        text:'删除',
 	  		        iconCls:'icon-cut',
@@ -289,13 +315,82 @@ $(function(){
 	  		    	win2.window('open');  
 	  		 //   	form2.url ='/tcweb/twocode/lingyong';	
 	  		        }
-	  		    } 
+	  		    },{
+	  		 		text:'标签领用excel模板',
+	  		 		iconCls:'icon-redo',
+	  		 		handler: function() {
+	  		 			window.location.href="/tcweb/twocode/downLoad?way=chuku";
+	  		 		}
+	  	 		},{
+	  		    	text:'标签领用导入',
+	  		    	iconCls:'icon-redo',
+	  		    	handler: function() {
+	  		    		//$('#exportId').unbind("click");
+	  		    		//$("#exportId").click(chukuExport);
+	  		    		//$("#exportId").on('click',chukuExport);
+	  		    		daoRuUrl = "/tcweb/twocode/chukuExport";
+	  		    		daoRuWay = "chuku";
+	  		    		//winDr.window("open");
+	  		    		$("#daoruId").val("");
+	  		    		$("#daoruId").click();
+	  		    	}
+	  		    }
 	  		    ]
 });	
 	
 	$('#tt').datagrid('getPager').pagination({displayMsg:'显示 {from} 至 {to} 条  共 {total} 条记录', afterPageText:'/{pages}', beforePageText:'页',pageList:[15,25,30,35,40]});   
 
-	
+	$('#failDatatt').datagrid({
+		    title:'已经被领用不能再领用标签',
+		    fit:true,
+	        url:'',
+	        columns:[[   
+	  	      {field:'registNumber',align:'center',title:'标签编号',width:100},
+	  	      {field:'infoState',align:'center',halign:'center',title:'标签状态',width:$(this).width() * 0.07,formatter: function(value,rec,index) {
+	  	    	if(value == 0)
+                    return "入库";
+                else if(value == 1)
+  	                return "领用";
+                else if(value == 2)
+  	                return "粘贴";
+                else if(value == 3)
+  	                return "有效";
+                else if(value == 4)
+  	                return "无效";
+			         },styler: function (value, row, index) {
+			        	 if(value==0){
+			                 return 'background-color:#e6e6e6;';
+			        	  }
+			        	 else if(value == 1){
+			        		 return 'background-color:#95B8E7;';
+				         }
+			        	 else if(value == 2){
+			        		 return 'background-color:#fff3f3;';
+				         }
+			        	 else if(value == 3){
+			        		 return 'background-color:#bbb;';
+				         }
+			        	 else if(value == 4){
+			        		 return 'background-color:#ffa8a8;';
+				         }
+
+			          }},
+	  	        {field:'ywCompanyName',align:'center',halign:'center',title:'标签领用人公司',width:$(this).width() * 0.11},
+	  	        {field:'userName',align:'center',halign:'center',title:'标签领用人',width:80},
+	  	        {field:'rtime',align:'center',halign:'center',title:'标签领用时间',width:140},
+	  	        {field:'gailing',align:'center',title:'改领',width:80,
+	  	        	formatter: function(value,rec,index) { 
+		        	var registNumber = ''+rec.registNumber;
+		        	var infoState = rec.infoState;
+		        	if(infoState == 1)
+	  	  			return '<a href="#" onclick="altertwocode('+'\''+registNumber+'\''+','+infoState+')"><i class="fa fa-exchange" aria-hidden="true" style="color:#61B5CF;"></i></a>';
+		        	else
+			  	  		  return '';   
+	  	            }}
+	  	        ]],
+	  	 		singleSelect:true,
+	  	 		striped:true
+	  });
 }
 );
 
@@ -672,6 +767,111 @@ function saveTwoCodeInfo4(){
 	   
 	 
 }
+
+function rukuExport() {
+	//winDr.window("close");
+	//alert("入库导入");
+	$("#drFrom").form('submit',{
+		url: daoRuUrl,
+		onSubmit: function(){ 
+			   var filename = $("#daoruId").val();
+			   var ext = filename.substring(filename.lastIndexOf("\\") + 1);
+			   //alert(ext);
+			   //var ext = filename.substring(filename.lastIndexOf(".") + 1);
+			   //alert(ext);
+			   //if(ext == "xlsx" || ext == 'xls' ){
+			   if(ext == "标签入库信息.xlsx"){
+				    $.messager.progress({
+				    	text:'正在导入...'
+				    });   
+				    //alert("tongduo");
+			   } else {
+				    $.messager.alert('Warning','上传文件有误,请下载相应模板!','warning'); 
+			   		return false;
+			   }
+			   
+		   }, 
+		   success:function(data){ 
+			   $.messager.progress('close');  
+			   $.messager.alert("信息",data,"info"); 
+
+			   } 
+
+	});
+}
+
+function chukuExport() {
+	//alert("领用导入");
+	//winDr.window("close");
+	$("#drFrom").form('submit',{
+		url: daoRuUrl,
+		onSubmit: function(){ 
+			   var filename = $("#daoruId").val();
+			   var ext = filename.substring(filename.lastIndexOf("\\") + 1);
+			   //alert(ext);
+			   //var ext = filename.substring(filename.lastIndexOf(".") + 1);
+			   //alert(ext);
+			   //if(ext == "xlsx" || ext == 'xls' ){
+			   if(ext == "标签领用信息.xlsx"){
+				    $.messager.progress({
+				    	text:'正在导入...'
+				    });   
+				    //alert("tongduo");
+			   } else {
+				    $.messager.alert('Warning','上传文件有误,请下载相应模板!','warning'); 
+			   		return false;
+			   }
+			   
+		   }, 
+		   success:function(data){ 
+			   $.messager.progress('close');  
+			   var dataObject = JSON.parse(data);
+			   if(dataObject.success == "failer") {
+				   $.messager.alert("error","导入异常,请与管理员联系!","error");
+			   } else {
+				   $("#exportSuccess").val(dataObject.exportSuccess);
+				   $("#exportFailer").val(dataObject.exportFailer);
+				   //$("#registNumberNoExistCount").html(dataObject.registNumberNoExistCount);
+				   $("#registNumberNoExist").val(dataObject.registNumberNoExist);
+				   $("#registNumberNoExist").attr('title',dataObject.registNumberNoExist);
+				   //$("#companyNoExistCount").html(dataObject.companyNoExistCount);
+				   $("#companyNoExist").val(dataObject.companyNoExist);
+				   $("#companyNoExist").attr('title',dataObject.companyNoExist);
+				   //$("#incompleteCount").html(dataObject.incompleteCount);
+				   $("#incomplete").val(dataObject.incomplete);
+				   $("#incomplete").attr('title',dataObject.incomplete);
+				   $('#failDatatt').datagrid('loadData',dataObject.failData);
+				   winDrResult.window('open');
+			   }
+
+			} 
+
+	});
+}
+
+function submitFile() {
+	//alert("上传文件");
+	//winDr.window("open");
+	var filename = $("#daoruId").val();
+	//alert(filename);
+	if(filename != "" && filename != null) {
+		//$("#exportId").click();
+		   //alert(ext);
+		   //var ext = filename.substring(filename.lastIndexOf(".") + 1);
+		   //alert(ext);
+		   //if(ext == "xlsx" || ext == 'xls' ){
+		//alert(ext);
+		   if(daoRuWay == "ruku"){
+			    rukuExport();
+			    //alert("tongduo");
+		   } else if(daoRuWay == "chuku") {
+			   chukuExport();
+			} else {
+			    $.messager.alert('Warning','未知错误,请与管理员联系!','warning'); 
+		   }
+	}
+	
+}
 </script>
 <style type="text/css">
 td{
@@ -935,5 +1135,65 @@ font-size:12px;
   </div>
   
   </div>
+  
+   <!--  批量导入 -->
+  <div id="car-windowDr" title="详细信息" style="width:300px;height:200px;">
+   		<form id='drFrom' enctype="multipart/form-data" action="" method="post">
+   			<table align="center" id="drTable">
+   				<tr>
+   					<td>
+   				
+	   					<input type="file" name="file" id="daoruId" onchange="submitFile()"/>
+   					</td>
+   				</tr>
+   				<tr align="center">
+   					<td>
+				   		<input id="exportId" type="button" value="导入"/>
+   					</td>
+   				</tr>
+   			</table>
+   		</form>
+   </div>
+   
+   <!-- 领用导入返回结果 -->
+   <div id="failure-window2" title="领用导入结果" style="width:800px;height:500px;">
+      <div class="easyui-layout" data-options="fit:true"> 
+         <div data-options="region:'north'" style="height:50px;text-align:center;" > 
+            <table style="width:100%;height:100%;">
+             <tr>
+                <td width="150" align="center" style="background-color:#67C23A;height:34px;"  nowrap>领用成功：</td>
+                <td nowrap><input id="exportSuccess" name="exportSuccess"  class="form_input" readonly="readonly" style="border:none;outline:medium;height:100%;"></input></td>
+                <td width="150" align="center" style="background-color:#F56C6C;height:34px;"  nowrap>领用失败：</td>
+                <td nowrap><input id="exportFailer" name="exportFailer"  class="form_input" readonly="readonly" style="border:none;outline:medium;height:100%;"></input></td>
+             </tr>
+            </table>
+         </div>
+         <div data-options="region:'center'" style="height:400px;text-align:center;">
+          <table style="width:100%;height:20%">
+             <tr>
+                <td width="150" align="center" style="background-color:#F5F5F5;height:10px;"  nowrap>标签没有入库的标签编号<!-- :<span id="registNumberNoExistCount"></span> --></td>
+                <td nowrap><!-- 标签编号: --><input id="registNumberNoExist" name="registNumberNoExist" type="text"  class="form_input" readonly="readonly" style="border:none;outline:medium;height:100%;"></input></td>
+             </tr>
+             <tr>
+                <td width="150" align="center" style="background-color:#F5F5F5;height:10px;"  nowrap>领用人单位有误的标签编号<!-- :<span id="companyNoExistCount"></span> --></td>
+                <td nowrap><!-- 标签编号: --><input id="companyNoExist" name="companyNoExist" type="text"  class="form_input" readonly="readonly" style="border:none;outline:medium;height:100%;"></input></td>
+             </tr>
+             <tr>
+             	<td width="150" align="center" style="background-color:#F5F5F5;height:10px;"  nowrap>导入数据不全或者有误的标签<!-- :<span id="incompleteCount"></span> --></td>
+                <td nowrap><!-- 标签编号: --><input id="incomplete" name="incomplete" title="" type="text"  class="form_input" readonly="readonly" style="border:none;outline:medium;height:100%;"></input></td>
+             </tr>
+            </table> 
+            <div id="main-center" style="float:left;margin:0px;overflow:auto;width:100%;height:75%" class="column">      
+	       		<table id="failDatatt"></table>    
+	    	</div> 
+         </div> 
+    
+         <!-- <div data-options="region:'south'" style="overflow-x:auto;height:500px;">
+          	<div id="main-center" style="float:left;margin:0px;overflow:auto;width:50%" class="column">      
+	       		<table id="failDatatt"></table>    
+	    	</div> 
+         </div>  -->
+   </div>
+   </div>
 </body>
 </html>
