@@ -35,13 +35,20 @@ import javax.servlet.http.Cookie;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -15383,23 +15390,50 @@ public View queryKpinfoListMul(YwKaoPingInfoVO info){
 				public String detaskliststatisticExport(DdElevaltorInfoVO info) {
 					
 					//获取模板的输入流
-			        InputStream inputStream = null;
+			        //InputStream inputStream = null;
 			        XSSFSheet sheetAt = null;
 			        XSSFWorkbook workbook = null;
-					 try {
-						inputStream = new FileInputStream("C:/Users/HRF/Desktop/完成统计信息.xlsx");
-						//获取模板的工作薄
-						workbook = new XSSFWorkbook(inputStream);
-						sheetAt = workbook.getSheetAt(0);
-					} catch (FileNotFoundException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-						return "导出异常,请尽快与管理员联系!";
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						return "导出异常,请尽快与管理员联系!";
-					}
+					 //inputStream = new FileInputStream("C:/Users/HRF/Desktop/完成统计信息.xlsx");
+					//获取模板的工作薄
+					workbook = new XSSFWorkbook();
+					sheetAt = workbook.createSheet("完成统计");
+					// 设置表格默认列宽度为15个字节  
+				        sheetAt.setDefaultColumnWidth((short) 30);  
+				        // 生成一个样式  
+				        XSSFCellStyle style = workbook.createCellStyle();  
+				       
+				        // 设置这些样式  
+				      //设置这些样式  
+				        style.setFillForegroundColor(HSSFColor.HSSFColorPredefined.PALE_BLUE.getIndex());  //設置單元格背景
+				        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);   //設置背景填充模式
+				        style.setBorderBottom(BorderStyle.THIN);    
+				        style.setBorderLeft(BorderStyle.THIN);  
+				        style.setBorderRight(BorderStyle.THIN);  
+				        style.setBorderTop(BorderStyle.THIN);  
+				        style.setAlignment(HorizontalAlignment.CENTER);   
+				        // 生成一个字体  
+				        XSSFFont font = workbook.createFont();  
+				        font.setColor(HSSFColor.HSSFColorPredefined.BLACK.getIndex());  
+				        font.setBold(true);
+				        font.setFontHeightInPoints((short)16);
+				        // 把字体应用到当前的样式  
+				        style.setFont(font); 
+				     // 生成并设置另一个样式,用于设置内容样式  
+				        XSSFCellStyle style2 = workbook.createCellStyle();  
+				        style2.setFillForegroundColor(HSSFColor.HSSFColorPredefined.WHITE.getIndex());  
+				        style2.setFillPattern(FillPatternType.SOLID_FOREGROUND);  
+				        style2.setBorderBottom(BorderStyle.THIN);  
+				        style2.setBorderLeft(BorderStyle.THIN);  
+				        style2.setBorderRight(BorderStyle.THIN);  
+				        style2.setBorderTop(BorderStyle.THIN);  
+				        style2.setAlignment(HorizontalAlignment.CENTER);  
+				        style2.setVerticalAlignment(VerticalAlignment.CENTER);  
+				        // 生成另一个字体  
+				        XSSFFont font2 = workbook.createFont(); 
+				        font2.setFontHeightInPoints((short)14);
+				        font2.setBold(false);  
+				        // 把字体应用到当前的样式  
+				        style2.setFont(font2); 
 					 XSSFRow row = null;
 				     XSSFCell cell = null;
 					 
@@ -15589,6 +15623,13 @@ public View queryKpinfoListMul(YwKaoPingInfoVO info){
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							} 
+							String[] headers = new String[]{"电梯编号","地址","楼盘名称","栋","单元","粘贴人","任务安排时间","上传人","上传人公司","上传时间","任务状态","登记编号","单位内部编号"};
+					        row = sheetAt.createRow(0);
+					        for (int i = 0;i < headers.length;i ++) {
+					        	cell = row.createCell(i);
+					        	cell.setCellValue(headers[i]);
+					        	cell.setCellStyle(style);
+					        }
 							DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 							 int count = 1;
 							 for(int i = 1;i <= Math.floor(total/500) + 1; i ++) {
@@ -15626,28 +15667,38 @@ public View queryKpinfoListMul(YwKaoPingInfoVO info){
 									        	row = sheetAt.createRow(count);
 									        	cell = row.createCell(0);
 									        	cell.setCellValue(ddElevaltorInfoVO.getRegistNumber());
+									        	cell.setCellStyle(style2);
 										        cell = row.createCell(1);
 										        cell.setCellValue(ddElevaltorInfoVO.getAddress());
+										        cell.setCellStyle(style2);
 										        cell = row.createCell(2);
 										        cell.setCellValue(ddElevaltorInfoVO.getBuildingName());
+										        cell.setCellStyle(style2);
 										        cell = row.createCell(3);
 										        cell.setCellValue(ddElevaltorInfoVO.getBuilding());
+										        cell.setCellStyle(style2);
 										        cell = row.createCell(4);
 										        cell.setCellValue(ddElevaltorInfoVO.getUnit());
+										        cell.setCellStyle(style2);
 										        cell = row.createCell(5);
 										        if(ddElevaltorInfoVO.getPastePersonName() == null || ddElevaltorInfoVO.getPastePersonName().length() == 0) {
 										        	cell.setCellValue(ddElevaltorInfoVO.getPastePersonName());
 										        } else {
 										        	cell.setCellValue((ddElevaltorInfoVO.getPastePersonName().contains(".") || ddElevaltorInfoVO.getPastePersonName().contains("/"))?"":ddElevaltorInfoVO.getPastePersonName());
 										        }
+										        cell.setCellStyle(style2);
 										        cell = row.createCell(6);
 										        cell.setCellValue(dateFormat.format(ddElevaltorInfoVO.getArrangeTime()));
+										        cell.setCellStyle(style2);
 										        cell = row.createCell(7);
 										        cell.setCellValue(ddElevaltorInfoVO.getSubPersonName());
+										        cell.setCellStyle(style2);
 										        cell = row.createCell(8);
 										        cell.setCellValue(ddElevaltorInfoVO.getYwCompanyName());
+										        cell.setCellStyle(style2);
 										        cell = row.createCell(9);
 										        cell.setCellValue(ddElevaltorInfoVO.getSubTime2());
+										        cell.setCellStyle(style2);
 										        cell = row.createCell(10);
 										        if(ddElevaltorInfoVO.getRecordSate() == 1) {
 										        	cell.setCellValue("未完成");
@@ -15656,11 +15707,13 @@ public View queryKpinfoListMul(YwKaoPingInfoVO info){
 										        } else {
 										        	cell.setCellValue("已完成");
 										        }
-										        
+										        cell.setCellStyle(style2);
 										        cell = row.createCell(11);
 										        cell.setCellValue(ddElevaltorInfoVO.getRegistCode());
+										        cell.setCellStyle(style2);
 										        cell = row.createCell(12);
 										        cell.setCellValue(ddElevaltorInfoVO.getUseNumber());
+										        cell.setCellStyle(style2);
 										        count ++;
 									 } 
 								 }
@@ -15674,7 +15727,7 @@ public View queryKpinfoListMul(YwKaoPingInfoVO info){
 									workbook.write(out);
 									out.flush();
 									out.close();
-									inputStream.close();
+									//inputStream.close();
 									workbook.close();
 								} catch (Exception e) {
 									// TODO: handle exception

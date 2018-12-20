@@ -127,6 +127,7 @@ $(function(){
 	//批量导入
 	winDr = $('#car-windowDr').window({  closed:true,draggable:false,modal:true,minimizable:false,collapsible:false,maximizable:false});
 	winDrResult = $('#failure-window2').window({minimizable:false,maximizable:false,collapsible:false,closed:true,draggable:false,modal:true,onClose:function(){$('#tt').datagrid('reload')} });   
+	winrukuDrResult = $('#failure-window3').window({minimizable:false,maximizable:false,collapsible:false,closed:true,draggable:false,modal:true,onClose:function(){$('#tt').datagrid('reload')} });   
      var url = encodeURI(encodeURI('/tcweb/elevator/getAutoYwCompanyList')); 
  	 $("#ywCompanyIdinfo").autocomplete(  
  	            url,  
@@ -391,6 +392,49 @@ $(function(){
 	  	 		singleSelect:true,
 	  	 		striped:true
 	  });
+	
+	$('#rukufailDatatt').datagrid({
+	    title:'已经入库的标签',
+	    fit:true,
+        url:'',
+        columns:[[   
+  	      {field:'registNumber',align:'center',title:'标签编号',width:100},
+  	      {field:'infoState',align:'center',halign:'center',title:'标签状态',width:$(this).width() * 0.07,formatter: function(value,rec,index) {
+  	    	if(value == 0)
+                return "入库";
+            else if(value == 1)
+	                return "领用";
+            else if(value == 2)
+	                return "粘贴";
+            else if(value == 3)
+	                return "有效";
+            else if(value == 4)
+	                return "无效";
+		         },styler: function (value, row, index) {
+		        	 if(value==0){
+		                 return 'background-color:#e6e6e6;';
+		        	  }
+		        	 else if(value == 1){
+		        		 return 'background-color:#95B8E7;';
+			         }
+		        	 else if(value == 2){
+		        		 return 'background-color:#fff3f3;';
+			         }
+		        	 else if(value == 3){
+		        		 return 'background-color:#bbb;';
+			         }
+		        	 else if(value == 4){
+		        		 return 'background-color:#ffa8a8;';
+			         }
+
+		          }},
+  	        {field:'ywCompanyName',align:'center',halign:'center',title:'标签领用人公司',width:$(this).width() * 0.11},
+  	        {field:'userName',align:'center',halign:'center',title:'标签领用人',width:80},
+  	        {field:'rtime',align:'center',halign:'center',title:'标签领用时间',width:140}
+  	        ]],
+  	 		singleSelect:true,
+  	 		striped:true
+  });
 }
 );
 
@@ -793,7 +837,18 @@ function rukuExport() {
 		   }, 
 		   success:function(data){ 
 			   $.messager.progress('close');  
-			   $.messager.alert("信息",data,"info"); 
+			   var dataObject = JSON.parse(data);
+			   if(dataObject.success == "failer") {
+				   $.messager.alert("error","导入异常,请与管理员联系!","error");
+			   } else {
+				   $("#importSuccess").val(dataObject.count);
+				   $("#importFailer").val(dataObject.importFailer);
+				   //$("#registNumberNoExistCount").html(dataObject.registNumberNoExistCount);
+				   $("#registNumberError").val(dataObject.incomplete);
+				   $("#registNumberError").attr('title',dataObject.incomplete);
+				   $('#rukufailDatatt').datagrid('loadData',dataObject.result);
+				   winrukuDrResult.window('open');
+			   } 
 
 			   } 
 
@@ -1153,6 +1208,33 @@ font-size:12px;
    				</tr>
    			</table>
    		</form>
+   </div>
+   
+   <!-- 入库导入返回结果 -->
+   <div id="failure-window3" title="入库导入结果" style="width:750px;height:500px;">
+      <div class="easyui-layout" data-options="fit:true"> 
+         <div data-options="region:'north'" style="height:50px;text-align:center;" > 
+            <table style="width:100%;height:100%;">
+             <tr>
+                <td width="150" align="center" style="background-color:#67C23A;height:34px;"  nowrap>领用成功：</td>
+                <td nowrap><input id="importSuccess" name="exportSuccess"  class="form_input" readonly="readonly" style="border:none;outline:medium;height:100%;"></input></td>
+                <td width="150" align="center" style="background-color:#F56C6C;height:34px;"  nowrap>领用失败：</td>
+                <td nowrap><input id="importFailer" name="exportFailer"  class="form_input" readonly="readonly" style="border:none;outline:medium;height:100%;"></input></td>
+             </tr>
+            </table>
+         </div>
+         <div data-options="region:'center'" style="height:400px;text-align:center;">
+          <table style="width:100%;height:10%">
+             <tr>
+                <td width="150" align="center" style="background-color:#F5F5F5;height:10px;"  nowrap>标签编号有误的标签<!-- :<span id="registNumberNoExistCount"></span> --></td>
+                <td nowrap><!-- 标签编号: --><input id="registNumberError" name="registNumberError" type="text"  class="form_input" readonly="readonly" style="border:none;outline:medium;height:100%;"></input></td>
+             </tr>
+            </table> 
+            <div id="main-center" style="float:left;margin:0px;overflow:auto;width:100%;height:85%" class="column">      
+	       		<table id="rukufailDatatt"></table>    
+	    	</div> 
+         </div> 
+   </div>
    </div>
    
    <!-- 领用导入返回结果 -->
