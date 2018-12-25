@@ -1364,13 +1364,97 @@ public class CompanyController extends ApplicationController{
 	  * 备案单位的excel表导出
 	  * @return
 	  */
-	 public String wbCompanyDc() {
+	 public String wbCompanyDc(CompanyInfoVO info) {
 		 try {
 			 //获取模板的输入流
 	        //InputStream inputStream = CompanyController.class.getClassLoader().getResourceAsStream("templates/companyinfo.xlsx");
 			 //InputStream inputStream = new FileInputStream("C:/Users/HRF/Desktop/维保单位核实信息.xlsx");
 	        //导出数据
-	        List<YwCompanyInfo> items = YwCompanyInfo.findAll(YwCompanyInfo.class);
+			 String companyName ="";
+			 String address = "";
+			 String qstartTime ="";
+			 String qendTime="";
+			 int isBeian = -1;
+			 
+			 //companyName =info.getCompanyName();
+			 //address = info.getAddress();
+			 //qstartTime =info.getQstartTime();
+			 //qendTime = info.getQendTime();
+			 isBeian = info.getIsBeian();
+			 qstartTime = new String(info.getQstartTime().getBytes("iso-8859-1"),"utf-8");
+			 qendTime = new String(info.getQendTime().getBytes("iso-8859-1"),"utf-8");
+			 companyName = new String(info.getCompanyName().getBytes("iso-8859-1"),"utf-8");
+			 address = new String(info.getAddress().getBytes("iso-8859-1"),"utf-8");
+			
+			 String sql = "";
+			 String conditions ="";
+			 String conditionsSql="";
+			 
+			
+			 if(!"".equals(companyName)){
+				 if(!"".equals(conditions)){
+					 conditions =conditions+" and t.companyName like '%"+companyName+"%'";	 
+			     }
+			     else{   
+			    	 conditions =" t.companyName like '%"+companyName+"%'";	
+			      }
+			 }
+			 
+			 if(!"".equals(address)){
+				 if(!"".equals(conditions)){
+					 conditions =conditions+" and t.address like '%"+address+"%'";	 
+			     }
+			     else{   
+			    	 conditions =" t.address like '%"+address+"%'";	
+			      }
+			 }
+			 
+			 if(!"".equals(qstartTime)){
+				 if(!"".equals(conditions)){
+					 conditions =conditions+" and t.validity  >= '"+qstartTime+"'" ;	 
+				 } 
+				 else{
+					 conditions =" t.validity  >= '"+qstartTime+"'" ;	 
+				 }
+			 }
+			 
+			 if(!"".equals(qendTime)){
+				 if(!"".equals(conditions)){
+					 conditions =conditions+" and t.validity  <= '"+qendTime+"'" ;	 
+				 } 
+				 else{
+					 conditions =" t.validity  <= '"+qendTime+"'" ;	 
+				 }
+			 }
+			 if(isBeian == 1) {
+				 if(!"".equals(conditions)){
+					 conditions =conditions+" and t.isBeian="+isBeian;	 
+				 } 
+				 else{
+					 conditions =" t.isBeian="+isBeian;	 
+				 }
+				 //未备案
+			 } else if(isBeian == 2){
+				 if(!"".equals(conditions)){
+					 conditions =conditions+" and (t.isBeian != 1 or t.isBeian is null) " ;	 
+				 } 
+				 else{
+					 conditions =" (t.isBeian != 1 or t.isBeian is null) " ;	 
+				 }
+			 }
+			 
+		    if(!"".equals(conditions)){
+		    	sql ="select t.hmdFlag as hmdFlag,t.id as id,t.isBeian as isBeian, isnull(t.companyCode,'') as companyCode,isnull(t.companyName,'') as companyName,isnull(t.address,'') as address,isnull(t.phone,'') as phone,isnull(t.contact,'') as contact,isnull(t.representativor,'') as representativor,isnull(t.certificateCode,'') as certificateCode,isnull(t.telephone,'') as telephone,isnull(t.validity,'') as validity,isnull(t.qlevel,'') as qlevel,t.area as area,te.filingDate as filingDate,te.registAddress as registAddress,te.representativorTel as representativorTel,te.contactTel as contactTel,te.officeProof as officeProof,te.safeyManPerson as safeyManPerson,te.type as type,te.filingPerson as filingPerson,te.filingPersonTel as filingPersonTel,te.note as note from TwoCodeCompanyInfo t left join TwoCodeYwCompanyInfo te on t.id=te.id where  "+ conditions+" and t.type ='维保' and t.ispasteyw =0 and t.companyName!='未知' ";
+		    	conditionsSql ="select count(*) from TwoCodeCompanyInfo t  where "+ conditions+" and t.type ='维保' and t.ispasteyw =0 and t.companyName!='未知' ";
+		    }
+		    else{
+		    	sql ="select t.hmdFlag as hmdFlag,t.id as id,t.isBeian as isBeian, isnull(t.companyCode,'') as companyCode,isnull(t.companyName,'') as companyName,isnull(t.address,'') as address,isnull(t.phone,'') as phone,isnull(t.contact,'') as contact,isnull(t.representativor,'') as representativor,isnull(t.certificateCode,'') as certificateCode,isnull(t.telephone,'') as telephone,isnull(t.validity,'') as validity,isnull(t.qlevel,'') as qlevel,t.area as area,te.filingDate as filingDate,te.registAddress as registAddress,te.representativorTel as representativorTel,te.contactTel as contactTel,te.officeProof as officeProof,te.safeyManPerson as safeyManPerson,te.type as type,te.filingPerson as filingPerson,te.filingPersonTel as filingPersonTel,te.note as note from TwoCodeCompanyInfo t left join TwoCodeYwCompanyInfo te on t.id=te.id where  t.type ='维保' and t.ispasteyw =0 and t.companyName!='未知'";
+		    	conditionsSql ="select count(*) from TwoCodeCompanyInfo t  where  t.type ='维保' and t.ispasteyw =0 and t.companyName!='未知'";
+		
+		    }
+		    
+		
+	        List<YwCompanyInfo> items = YwCompanyInfo.findBySql(YwCompanyInfo.class,sql, null, "t.id desc");
 	        //获取模板的工作薄
 	        //XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
 	        XSSFWorkbook workbook = new XSSFWorkbook();

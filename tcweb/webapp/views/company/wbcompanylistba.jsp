@@ -200,7 +200,13 @@ $(function(){
             handler: function () {
             	$.messager.confirm('Confirm','确认导出备案数据?',function(r){ 
             		if(r) {
-            			location.href="/tcweb/company/wbCompanyDc";
+            		    var qcompanyName=$('#qcompanyName').attr("value");
+            		    var qaddress=$('#qaddress').attr("value");
+            		    var qstartTime=$('#qstartTime').datebox("getValue");  
+            			var qendTime=$('#qendTime').datebox("getValue"); 
+            			var isBeianId = $("#isBeianId").combobox("getValue");
+            			queryParams='?companyName=' + qcompanyName + '&address=' + qaddress + '&qstartTime=' + qstartTime + '&qendTime=' + qendTime + '&isBeian=' + isBeianId;
+            			location.href=encodeURI("/tcweb/company/wbCompanyDc" + queryParams);
             			$.messager.show({
 		                    title:'提示信息',
 		                    msg:'请耐心等待!,正在导出...',

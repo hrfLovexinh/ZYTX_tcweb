@@ -295,15 +295,6 @@ $(function(){
 	    	handler:function() {
 	    		$.messager.confirm('Confirm','确认导出备案数据?',function(r){ 
             		if(r) {
-            			$.messager.show({
-		                    title:'提示信息',
-		                    msg:'请耐心等待!,正在导出...',
-		                    timeout:3000,
-		                    showType:'fade',
-		                    style:{
-		                        top:'45%'
-		                    }
-		                });
             			var recordSate=$('#recordSate option:selected').val();  
         	    	    var arrageType = $('#arrageType option:selected').val();
         	    	    var pastePersonID=$('#pastePersonID').attr("value"); 
@@ -320,7 +311,20 @@ $(function(){
         	    	    var url='/tcweb/elevator/detaskliststatisticExport';
         	    	    var queryParams= '?arrageType='+arrageType+'&pastePersonID='+pastePersonID+'&recordSate='+recordSate+'&qstartTime='+qstartTime+'&qendTime='+qendTime+'&buildingName='+buildingName+'&area='+area+'&shenhe='+shenhe+'&deviceId2='+deviceId2+'&registNumber='+registNumber;
         	    	    //var queryParams={'arrageType':arrageType,'pastePersonID':pastePersonID,'recordSate':recordSate,'qstartTime':qstartTime,'qendTime':qendTime,'buildingName':buildingName,'area':area,'shenhe':shenhe,'deviceId2':deviceId2,'registNumber':registNumber};
-        	    	    window.location.href=encodeURI(url + queryParams);
+        	    	    if(arrageType=='0' && pastePersonID=='0' && recordSate=='0' && qstartTime=='' && qendTime=='' && buildingName=='' && area=='' && shenhe=='2' && deviceId2=='0' && registNumber=='') {
+        	    	    	$.messager.alert('提示信息',"请输入查询条件后再导出!","info");
+        	    	    } else {
+        	    	    	$.messager.show({
+    		                    title:'提示信息',
+    		                    msg:'请耐心等待!,正在导出...',
+    		                    timeout:3000,
+    		                    showType:'fade',
+    		                    style:{
+    		                        top:'45%'
+    		                    }
+    		                });
+	        	    	    window.location.href=encodeURI(url + queryParams);
+        	    	    }
         	    	    //$.get(url,queryParams);
             		}
             	});

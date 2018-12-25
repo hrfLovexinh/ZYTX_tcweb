@@ -14235,7 +14235,6 @@ public View queryKpinfoListMul(YwKaoPingInfoVO info){
 					}
 				}
 			}
-			
 			//插入数据
 			daoruCount = daoruadd(ddElevaltorInfo,daoruCount,shibieCodes,registCodes);
 		}
@@ -14252,11 +14251,15 @@ public View queryKpinfoListMul(YwKaoPingInfoVO info){
 	 public long daoruadd(DdElevaltorInfo elevaltorInfo,long daoruCount,List<DdElevaltorInfo> shibieCodes,List<DdElevaltorInfo> registCodes){
 		 DdElevaltorInfoVO  elevaltorInfoExit = null;
 		 try {
+			 if(elevaltorInfo.getRegistNumber() == null || "".equals(elevaltorInfo.getRegistNumber())) {
+				 return daoruCount;
+			 }
 				if(!"".equals(elevaltorInfo.getShibieCode()) && elevaltorInfo.getShibieCode() != null)
 					elevaltorInfoExit = DdElevaltorInfoVO.findFirst(DdElevaltorInfoVO.class, "shibieCode = ?", new Object[] { elevaltorInfo.getShibieCode()});
 				if(elevaltorInfoExit != null){
 			    	//识别码已存在
 			    	shibieCodes.add(elevaltorInfo);
+			    	elevaltorInfoExit = null;
 			    	if(!"".equals(elevaltorInfo.getRegistCode()) && elevaltorInfo.getRegistCode() != null)
 						elevaltorInfoExit = DdElevaltorInfoVO.findFirst(DdElevaltorInfoVO.class, "registCode = ?", new Object[] { elevaltorInfo.getRegistCode()});
 					if(elevaltorInfoExit != null){
@@ -15472,157 +15475,155 @@ public View queryKpinfoListMul(YwKaoPingInfoVO info){
 					 String conditions="";
 					 String conditionsSql="";
 					 
-					  if(!"".equals(registNumber)){
-							 if(!"".equals(conditions)){
-								 conditions =conditions+" and t.registNumber like '%"+registNumber+"%'";	
-								} 
-								else{
-								 conditions =" t.registNumber like '%"+registNumber+"%'";	
-								}
-							 
-						 }
-					  
-					  if(!"".equals(buildingName)){
-							 if(!"".equals(conditions)){
-								 conditions =conditions+" and t.buildingName like '%"+buildingName+"%'";	
-								} 
-								else{
-									conditions =" t.buildingName like '%"+buildingName+"%'";	
-								}
-							 
-						 }
-					  
-					  if(!"".equals(qstartTime)){
-							 if(!"".equals(conditions)){
-								 conditions =conditions+" and (case when t.recordSate = 1 then t.arrangeTime  else t.subTime2  end )  >= '"+qstartTime+"'" ;	 
-							 } 
-							 else{
-								 conditions =" (case when t.recordSate = 1 then t.arrangeTime  else t.subTime2  end )  >= '"+qstartTime+"'" ;	 
-							 }
-						 }
-						 
-						 if(!"".equals(qendTime)){
-							 if(!"".equals(conditions)){
-								 conditions =conditions+" and (case when t.recordSate = 1 then t.arrangeTime  else t.subTime2  end )  <= '"+qendTime+"'" ;	 
-							 } 
-							 else{
-								 conditions =" (case when t.recordSate = 1 then t.arrangeTime  else t.subTime2  end )  <= '"+qendTime+"'" ;	 
-							 }
-						 }
-						 
-						 if(arrageType >0){
-							 if(!"".equals(conditions)){
-								 conditions =conditions+" and t.arrageType = "+arrageType;	 
-							 } 
-							 else{
-								 conditions ="t.arrageType = "+arrageType;	  
-							 } 
-						 }
-						 
-						 if(pastePersonID >0){
-							 if(!"".equals(conditions)){
-								 conditions =conditions+" and t.pastePersonID = "+pastePersonID;	 
-							 } 
-							 else{
-								 conditions ="t.pastePersonID = "+pastePersonID;	  
-							 } 
-						 }
-						 
-						 if(recordSate ==1){
-							 if(!"".equals(conditions)){
-								 conditions =conditions+" and t.recordSate = "+recordSate;	 
-							 } 
-							 else{
-								 conditions ="t.recordSate = "+recordSate;	  
-							 } 
-						 }
-						 
-						 if(recordSate ==2){
-							 if(!"".equals(conditions)){
-								 conditions =conditions+" and t.recordSate > 1 ";	 
-							 } 
-							 else{
-								 conditions ="t.recordSate > 1 ";	  
-							 } 
-						 }
-						 
-						 if(recordSate ==0){
-							 if(!"".equals(conditions)){
-								 conditions =conditions+" and t.recordSate > 0 ";	 
-							 } 
-							 else{
-								 conditions ="t.recordSate > 0 ";	  
-							 } 
-						 }
-					  
-						 if(!"".equals(area)){
-							 if(!"".equals(conditions)){
-								 conditions =conditions+" and t.area like '%"+area+"%'";	
-								} 
-								else{
-									conditions =" t.area like '%"+area+"%'";	
-								}
-							 
-						 }
-						 
-						 if(shenhe < 2){
-							 if(!"".equals(conditions)){
-								 conditions =conditions+" and t.shenhe = "+shenhe;	 
-							 } 
-							 else{
-								 conditions ="t.shenhe = "+shenhe;	  
-							 } 
-						 }
-						 
-						 if("1".equals(deviceId2)){
-							 if(!"".equals(conditions)){
-								 conditions =conditions+" and (t.deviceId2 is not null and t.deviceId2 !="+"\'"+"\' ) ";	
-							 }
-							 else{
-								 conditions =" (t.deviceId2 is not null and t.deviceId2 !="+"\'"+"\' ) "; 
-							 } 
-						 }
-						 
-						 if("2".equals(deviceId2)){
-							 if(!"".equals(conditions)){
-								 conditions =conditions+" (t.deviceId2 is  null or t.deviceId2 ="+"\'"+"\' ) ";	
-							 }
-							 else{
-								 conditions =" (t.deviceId2 is  null or t.deviceId2 ="+"\'"+"\' ) "; 
-							 } 
-						 } 
-						 
-						  if(!"".equals(conditions)){
-						//	  sql ="select isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime2,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber where  "+ conditions;  
-							  if("1".equals(cityName)){
-							     sql ="select isnull(t.shibieCode,'') as shibieCode,isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName,case when CHARINDEX('.',cp.companyName)>0 or CHARINDEX('/',cp.companyName)>0 then '' else cp.companyName end as ywCompanyName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeCompanyInfo cp on te.companyid=cp.id left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber where  "+ conditions;	  
-							  }
-							  else{
-							     sql ="select isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName,case when CHARINDEX('.',cp.companyName)>0 or CHARINDEX('/',cp.companyName)>0 then '' else cp.companyName end as ywCompanyName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeCompanyInfo cp on te.companyid=cp.id left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber where  "+ conditions;  
-							  } 
-							  conditionsSql = "select count(*) from DdTwoCodeElevatorYwCompanyInfo  t  where "+ conditions;
-					   		 }
-					   	else{
-					   		  if("1".equals(cityName)){
-					   			  sql ="select isnull(t.shibieCode,'') as shibieCode,isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName,case when CHARINDEX('.',cp.companyName)>0 or CHARINDEX('/',cp.companyName)>0 then '' else cp.companyName end as ywCompanyName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeCompanyInfo cp on te.companyid=cp.id left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber  ";	 	 
-					   		  }
-					   		  else{
-					   		     sql ="select isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName,case when CHARINDEX('.',cp.companyName)>0 or CHARINDEX('/',cp.companyName)>0 then '' else cp.companyName end as ywCompanyName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeCompanyInfo cp on te.companyid=cp.id left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber  ";
-					   		  }
-					   		  conditionsSql = "select count(*) from DdTwoCodeElevatorYwCompanyInfo  t  ";
-					   					 
-					   	} 
-						 
-						     long total =0;
-						     List<DdTwoCodeElevatorYwCompanyInfo> items =null;
-							try {
-								total = DdTwoCodeElevatorYwCompanyInfo.countBySql(DdTwoCodeElevatorYwCompanyInfo.class, conditionsSql, null);
-								
-								
-							} catch (ActiveRecordException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+					 if(!"".equals(registNumber)){
+						 if(!"".equals(conditions)){
+							 conditions =conditions+" and t.registNumber like '%"+registNumber+"%'";	
 							} 
+							else{
+							 conditions =" t.registNumber like '%"+registNumber+"%'";	
+							}
+						 
+					 }
+				  
+				  if(!"".equals(buildingName)){
+						 if(!"".equals(conditions)){
+							 conditions =conditions+" and t.buildingName like '%"+buildingName+"%'";	
+							} 
+							else{
+								conditions =" t.buildingName like '%"+buildingName+"%'";	
+							}
+						 
+					 }
+				  
+				  if(!"".equals(qstartTime)){
+						 if(!"".equals(conditions)){
+							 conditions =conditions+" and (case when t.recordSate = 1 then t.arrangeTime  else t.subTime2  end )  >= '"+qstartTime+"'" ;	 
+						 } 
+						 else{
+							 conditions =" (case when t.recordSate = 1 then t.arrangeTime  else t.subTime2  end )  >= '"+qstartTime+"'" ;	 
+						 }
+					 }
+					 
+					 if(!"".equals(qendTime)){
+						 if(!"".equals(conditions)){
+							 conditions =conditions+" and (case when t.recordSate = 1 then t.arrangeTime  else t.subTime2  end )  <= '"+qendTime+"'" ;	 
+						 } 
+						 else{
+							 conditions =" (case when t.recordSate = 1 then t.arrangeTime  else t.subTime2  end )  <= '"+qendTime+"'" ;	 
+						 }
+					 }
+					 
+					 if(arrageType >0){
+						 if(!"".equals(conditions)){
+							 conditions =conditions+" and t.arrageType = "+arrageType;	 
+						 } 
+						 else{
+							 conditions ="t.arrageType = "+arrageType;	  
+						 } 
+					 }
+					 
+					 if(pastePersonID >0){
+						 if(!"".equals(conditions)){
+							 conditions =conditions+" and t.pastePersonID = "+pastePersonID;	 
+						 } 
+						 else{
+							 conditions ="t.pastePersonID = "+pastePersonID;	  
+						 } 
+					 }
+					 
+					 if(recordSate ==1){
+						 if(!"".equals(conditions)){
+							 conditions =conditions+" and t.recordSate = "+recordSate;	 
+						 } 
+						 else{
+							 conditions ="t.recordSate = "+recordSate;	  
+						 } 
+					 }
+					 
+					 if(recordSate ==2){
+						 if(!"".equals(conditions)){
+							 conditions =conditions+" and t.recordSate > 1 ";	 
+						 } 
+						 else{
+							 conditions ="t.recordSate > 1 ";	  
+						 } 
+					 }
+					 
+					 if(recordSate ==0){
+						 if(!"".equals(conditions)){
+							 conditions =conditions+" and t.recordSate > 0 ";	 
+						 } 
+						 else{
+							 conditions ="t.recordSate > 0 ";	  
+						 } 
+					 }
+				  
+					 if(!"".equals(area)){
+						 if(!"".equals(conditions)){
+							 conditions =conditions+" and t.area like '%"+area+"%'";	
+							} 
+							else{
+								conditions =" t.area like '%"+area+"%'";	
+							}
+						 
+					 }
+					 
+					 if(shenhe < 2){
+						 if(!"".equals(conditions)){
+							 conditions =conditions+" and t.shenhe = "+shenhe;	 
+						 } 
+						 else{
+							 conditions ="t.shenhe = "+shenhe;	  
+						 } 
+					 }
+					 
+					 if("1".equals(deviceId2)){
+						 if(!"".equals(conditions)){
+							 conditions =conditions+" and (t.deviceId2 is not null and t.deviceId2 !="+"\'"+"\' ) ";	
+						 }
+						 else{
+							 conditions =" (t.deviceId2 is not null and t.deviceId2 !="+"\'"+"\' ) "; 
+						 } 
+					 }
+					 
+					 if("2".equals(deviceId2)){
+						 if(!"".equals(conditions)){
+							 conditions =conditions+" (t.deviceId2 is  null or t.deviceId2 ="+"\'"+"\' ) ";	
+						 }
+						 else{
+							 conditions =" (t.deviceId2 is  null or t.deviceId2 ="+"\'"+"\' ) "; 
+						 } 
+					 } 
+					 
+					  if(!"".equals(conditions)){
+					//	  sql ="select isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime2,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber where  "+ conditions;  
+						  if("1".equals(cityName)){
+						     sql ="select isnull(t.shibieCode,'') as shibieCode,isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber where  "+ conditions;	  
+						  }
+						  else{
+						     sql ="select isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber where  "+ conditions;  
+						  } 
+						  conditionsSql = "select count(*) from DdTwoCodeElevatorYwCompanyInfo  t  where "+ conditions;
+				   		 }
+				   	else{
+				   		  if("1".equals(cityName)){
+				   			  sql ="select isnull(t.shibieCode,'') as shibieCode,isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber  ";	 	 
+				   		  }
+				   		  else{
+				   		     sql ="select isnull(t.deviceId2,'') as deviceId2,isnull(t.picregistNumber,'') as picregistNumber,t.shenhe,t.arrageType,t.recordSate,t.pastePersonID,(case when tad.pasteTime is null then ''  else CONVERT(varchar(100), tad.pasteTime, 20) end) as  pasteTime2,tad.userName,(case when t.subTime2 is null then '' else  CONVERT(varchar(100), t.subTime2, 20) end) as subTime2,t.id,isnull(t.registNumber,'') as registNumber,t.address,t.buildingName,t.building,t.unit,(case when t.arrangeTime is null then ''  else CONVERT(varchar(100), t.arrangeTime, 20) end)  as arrangeTime,t.recordSate,t.registCode,t.useNumber,(select tc.userName from TCUserInfo tc where   tc.id =t.pastePersonID) as userName,isnull(tcr.deviceId,'') as deviceId,t.ischangInfo,t.ruKuValid,isnull(te.userName,'') as subPersonName from DdTwoCodeElevatorYwCompanyInfo  t left join TwoCodeUserExtInfo te on t.subPersonID =te.userid left join TwoCodeDeviceRelationInfo tcr on t.registNumber = tcr.registNumber left join TwoCodeDdEleappendix tad on t.registNumber = tad.registNumber  ";
+				   		  }
+				   		  conditionsSql = "select count(*) from DdTwoCodeElevatorYwCompanyInfo  t  ";
+				   					 
+				   	} 
+					 
+					     long total =0;
+					     List<DdTwoCodeElevatorYwCompanyInfo> items =null;
+						try {
+							total = DdTwoCodeElevatorYwCompanyInfo.countBySql(DdTwoCodeElevatorYwCompanyInfo.class, conditionsSql, null);
+						} catch (ActiveRecordException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} 
 							String[] headers = new String[]{"电梯编号","地址","楼盘名称","栋","单元","粘贴人","任务安排时间","上传人","上传人公司","上传时间","任务状态","登记编号","单位内部编号"};
 					        row = sheetAt.createRow(0);
 					        for (int i = 0;i < headers.length;i ++) {
